@@ -7,6 +7,7 @@ import { AppService } from './app.service'
 import { validate } from './env/schema'
 import { HealthModule } from './health/health.module'
 import { pinoHttp } from './logger'
+import { PrismaModule } from './prisma/prisma.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { pinoHttp } from './logger'
     }),
     HealthModule,
     LoggerModule.forRoot({ pinoHttp }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
