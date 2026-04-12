@@ -1,0 +1,39 @@
+# Dependencies
+**/node_modules
+
+# Env vars
+**/.env
+**/.env.staging
+**/.env.production
+**/.env.local
+
+### Terraform ###
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .zip files for lambda function
+*.zip
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+### Terragrunt ###
+# terragrunt cache directories
+**/.terragrunt-cache/*
+
+# Debug logs
+terragrunt-debug.tfvars.json
+
+# Lambda Function Pacakge files
+packages
+
+# Lambda Layer package & dependencies
+layers/
+
+# Helm chart archive files
+*.tgz
