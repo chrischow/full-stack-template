@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { LoggerModule } from 'nestjs-pino'
+import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod'
 
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
@@ -20,6 +22,16 @@ import { PrismaModule } from './prisma/prisma.module'
     PrismaModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor,
+    },
+    AppService,
+  ],
 })
 export class AppModule {}
