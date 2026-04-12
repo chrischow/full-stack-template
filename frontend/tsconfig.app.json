@@ -19,7 +19,16 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "~schema/*": [
+        "../backend/src/shared/schema/*"
+      ]
+    }
   },
   "include": ["src"]
 }
