@@ -1,11 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { APP_INTERCEPTOR, APP_PIPE, REQUEST } from '@nestjs/core'
+import { REQUEST } from '@nestjs/core'
 import { onError, ORPCError, ORPCModule } from '@orpc/nest'
 import { experimental_RethrowHandlerPlugin as RethrowHandlerPlugin } from '@orpc/server/plugins'
 import { Request } from 'express'
 import { LoggerModule } from 'nestjs-pino'
-import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod'
 
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
@@ -50,17 +49,7 @@ import { PrismaModule } from './prisma/prisma.module'
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    {
-      provide: APP_PIPE,
-      useClass: ZodValidationPipe,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ZodSerializerInterceptor,
-    },
-    AppService,
-  ],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
