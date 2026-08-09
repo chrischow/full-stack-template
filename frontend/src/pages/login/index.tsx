@@ -1,4 +1,5 @@
 import { Button, Card, Center, Heading, Stack } from '@chakra-ui/react'
+import { BiLogoGoogle } from 'react-icons/bi'
 
 import { BACKEND_PREFIX } from '@/app/constants'
 
@@ -16,7 +17,7 @@ const LoginPage = () => {
                 window.location.href = `${BACKEND_PREFIX}/auth/oauth`
               }}
             >
-              Login
+              <BiLogoGoogle /> Login with Google
             </Button>
           </Stack>
         </Card.Body>
