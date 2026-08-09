@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "pino-pretty": "pino-pretty -I meta,action,err,error,@timestamp,log\\.level --levelKey log\\.level -a @timestamp -t SYS:standard -o '\u001b[33m[{req.id}] \u001b[32m[{context}] \u001b[36m{log\\.level} \u001b[0m {message}'",
+    "db:sync": "dotenv -e .env.development prisma db push && prisma generate",
     "db:migration:gen": "dotenv -e .env.development prisma migrate dev --name $npm_config_name",
     "db:migration:run": "dotenv -e .env.development prisma migrate dev",
     "db:reset": "dotenv -e .env.development prisma migrate reset",
