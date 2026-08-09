@@ -10,6 +10,7 @@ import { validate } from './env/schema'
 import { HealthModule } from './health/health.module'
 import { pinoHttp } from './logger'
 import { HelmetMiddleware } from './middleware/helmet.middleware'
+import { SessionMiddleware } from './middleware/session.middleware'
 import { PrismaModule } from './prisma/prisma.module'
 
 @Module({
@@ -37,6 +38,6 @@ import { PrismaModule } from './prisma/prisma.module'
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(HelmetMiddleware).forRoutes('{*path}')
+    consumer.apply(HelmetMiddleware, SessionMiddleware).forRoutes('{*path}')
   }
 }

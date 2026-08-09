@@ -18,3 +18,10 @@ model User {
   name  String
   email String @unique
 }
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}

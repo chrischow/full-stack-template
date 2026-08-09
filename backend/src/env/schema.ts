@@ -12,6 +12,11 @@ export const EnvSchema = z.object({
   DB_NAME: z.string().default('panel'),
   DB_USERNAME: z.string(),
   DB_PASSWORD: z.string(),
+
+  // Session
+  SESSION_NAME: z.string(),
+  SESSION_SECRET: z.string(),
+  SESSION_COOKIE_MAX_AGE: z.coerce.number().default(1000 * 60 * 60 * 24),
 })
 
 export type Env = z.infer<typeof EnvSchema>
