@@ -22,7 +22,7 @@ export class SessionMiddleware implements NestMiddleware {
       name: env.SESSION_NAME,
       secret: env.SESSION_SECRET,
       resave: true,
-      saveUninitialized: true,
+      saveUninitialized: false,
       store: new PrismaSessionStore(this.prisma, {
         checkPeriod: 2 * 60 * 1000,
         dbRecordIdIsSessionId: true,

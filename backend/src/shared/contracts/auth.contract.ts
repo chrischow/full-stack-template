@@ -22,4 +22,18 @@ export const authContract = {
       tags,
     })
     .output(SessionUserSchema),
+  oauth: oc.route({
+    method: 'GET',
+    path: '/auth/oauth',
+    summary: 'Initiates OAuth',
+    tags,
+  }),
+  oauthRedirect: oc.route({
+    method: 'GET',
+    path: '/auth/oauth/redirect',
+    summary: 'OAuth redirect URL',
+    successStatus: 302,
+    outputStructure: 'detailed',
+    tags,
+  }),
 }

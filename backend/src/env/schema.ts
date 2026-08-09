@@ -7,6 +7,7 @@ configDotenv({ path: `.env.${nodeEnv}` })
 export const EnvSchema = z.object({
   NODE_ENV: z.enum(['local', 'development', 'test', 'staging', 'production']).default('development'),
   APP_PORT: z.string().transform(Number).default(8080),
+  APP_DOMAIN: z.string().default('http://localhost:3000'),
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.string().transform(Number).default(5432),
   DB_NAME: z.string().default('panel'),
@@ -17,6 +18,12 @@ export const EnvSchema = z.object({
   SESSION_NAME: z.string(),
   SESSION_SECRET: z.string(),
   SESSION_COOKIE_MAX_AGE: z.coerce.number().default(1000 * 60 * 60 * 24),
+
+  // Auth
+  OAUTH_BASE_URL: z.string().default('http://localhost:5556/dex'),
+  OAUTH_CLIENT_ID: z.string().default('full-stack-app'),
+  OAUTH_CLIENT_SECRET: z.string().default('auth-client-secret'),
+  OAUTH_CLIENT_CALLBACK_URL: z.string().default('http://localhost:3000/api/v1/auth/oauth/callback'),
 })
 
 export type Env = z.infer<typeof EnvSchema>

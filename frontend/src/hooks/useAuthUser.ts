@@ -1,12 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { orpc } from '@/app/orpc-client'
 
 export const useAuthUser = () => {
-  const { data, isLoading } = useQuery(orpc.auth.userinfo.queryOptions())
+  const { mutateAsync, isPending } = useMutation(orpc.auth.userinfo.mutationOptions())
 
   return {
-    user: data,
-    isUserLoading: isLoading,
+    getUser: mutateAsync,
+    isUserPending: isPending,
   }
 }

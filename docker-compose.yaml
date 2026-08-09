@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   db:
     image: postgres:16.14
@@ -16,6 +15,15 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
+  dex:
+    image: dexidp/dex:v2.45.1-alpine
+    container_name: dex
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./services/mock-auth/config.yaml:/etc/dex/config.yaml
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+
 
 volumes:
   app-pg-data:

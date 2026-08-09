@@ -3,6 +3,8 @@ import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 
+import { AuthProvider } from '@/context/auth'
+
 import { toaster } from '../ui/toaster'
 
 const WithProviders = () => {
@@ -32,7 +34,9 @@ const WithProviders = () => {
   )
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
     </QueryClientProvider>
   )
 }
