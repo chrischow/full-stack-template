@@ -25,8 +25,8 @@
       "@/*": [
         "./src/*"
       ],
-      "~schema/*": [
-        "../backend/src/shared/schema/*"
+      "~shared/*": [
+        "../backend/src/shared/*"
       ]
     }
   },

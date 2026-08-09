@@ -2,9 +2,9 @@ import './App.css'
 
 import { BrowserRouter, Route, Routes } from 'react-router'
 
-import { Provider } from './components/ui/provider'
-import { Toaster } from './components/ui/toaster'
-import WithProviders from './components/WithProviders'
+import { Provider } from '@/components/ui/provider'
+import { Toaster } from '@/components/ui/toaster'
+import WithProviders from '@/components/WithProviders'
 
 function App() {
   return (

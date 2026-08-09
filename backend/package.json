@@ -32,6 +32,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/terminus": "^11.1.1",
+    "@orpc/nest": "^1.15.0",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@quixo3/prisma-session-store": "^3.1.21",

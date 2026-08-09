@@ -1,6 +1,6 @@
 import { ecsFormat } from '@elastic/ecs-pino-format'
 import { randomUUID } from 'crypto'
-import { Request, Response } from 'express'
+import { IncomingMessage, ServerResponse } from 'http'
 import type { Params } from 'nestjs-pino'
 import { pino } from 'pino'
 import { err as errorSerializer } from 'pino-std-serializers'
@@ -31,7 +31,7 @@ export const pinoHttp: Params['pinoHttp'] = {
   customSuccessMessage: (req, res) => `${req.method ?? ''} ${req.url ?? ''} ${res.statusCode}`,
   customErrorMessage: (req, res, err) =>
     `${req.method ?? ''} ${req.url ?? ''} ${res.statusCode}: ${err.name} - ${err.message}`,
-  customErrorObject: (req: Request, res: Response, error: CustomException) => {
+  customErrorObject: (req: IncomingMessage, res: ServerResponse<IncomingMessage>, error: CustomException) => {
     const loggedErrorObject = {
       res,
       error: {
