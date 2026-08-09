@@ -1,21 +1,26 @@
-import { Button, Center, Heading, Stack } from '@chakra-ui/react'
+import { Button, Card, Center, Heading, Stack } from '@chakra-ui/react'
 
 import { BACKEND_PREFIX } from '@/app/constants'
 
 const LoginPage = () => {
   return (
     <Center w="100vw" h="100vh">
-      <Stack align="center" gap={4}>
-        <Heading size="4xl">Full Stack Template</Heading>
-        <Button
-          colorPalette={'purple'}
-          onClick={() => {
-            window.location.href = `${BACKEND_PREFIX}/auth/oauth`
-          }}
-        >
-          Login
-        </Button>
-      </Stack>
+      <Card.Root colorPalette="indigo" variant="outline">
+        <Card.Body>
+          <Stack align="center" gap={6}>
+            <Heading size="3xl">Full Stack Template</Heading>
+            <Button
+              w="full"
+              colorPalette={'brand'}
+              onClick={() => {
+                window.location.href = `${BACKEND_PREFIX}/auth/oauth`
+              }}
+            >
+              Login
+            </Button>
+          </Stack>
+        </Card.Body>
+      </Card.Root>
     </Center>
   )
 }

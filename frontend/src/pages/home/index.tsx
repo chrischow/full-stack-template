@@ -1,4 +1,4 @@
-import { Box, Heading } from '@chakra-ui/react'
+import { Center, Heading } from '@chakra-ui/react'
 import { useNavigate } from 'react-router'
 
 import { useAuthContext } from '@/context/auth'
@@ -13,9 +13,9 @@ const HomePage = () => {
   }
 
   return (
-    <Box>
+    <Center w="100vw" h="100vh">
       <Heading>Full Stack Template</Heading>
-    </Box>
+    </Center>
   )
 }
 
