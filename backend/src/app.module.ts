@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { LoggerModule } from 'nestjs-pino'
@@ -9,6 +9,7 @@ import { AppService } from './app.service'
 import { validate } from './env/schema'
 import { HealthModule } from './health/health.module'
 import { pinoHttp } from './logger'
+import { HelmetMiddleware } from './middleware/helmet.middleware'
 import { PrismaModule } from './prisma/prisma.module'
 
 @Module({
@@ -34,4 +35,8 @@ import { PrismaModule } from './prisma/prisma.module'
     AppService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(HelmetMiddleware).forRoutes('{*path}')
+  }
+}
