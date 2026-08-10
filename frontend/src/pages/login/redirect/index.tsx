@@ -3,13 +3,13 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { useAuthContext } from '@/context/auth'
-import { useAuthUser } from '@/hooks'
+import { useAuth } from '@/hooks'
 
 const LoginRedirectPage = () => {
   const navigate = useNavigate()
 
   const { login } = useAuthContext()
-  const { getUser } = useAuthUser()
+  const { getUser } = useAuth()
 
   useEffect(() => {
     const loginUser = async () => {

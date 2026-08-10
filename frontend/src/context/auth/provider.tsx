@@ -2,7 +2,7 @@ import { type ReactNode, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { useLocalStorage } from 'usehooks-ts'
 
-import { useAuthStatus, useLogout } from '@/hooks'
+import { useAuth } from '@/hooks'
 import type { SessionUser } from '~shared/schemas'
 
 import { AuthContext } from './context'
@@ -14,8 +14,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation()
 
   const [user, setUser] = useLocalStorage('USER', EMPTY_USER)
-  const { getAuthStatus } = useAuthStatus()
-  const { logoutUser } = useLogout()
+  const { getAuthStatus, logoutUser } = useAuth()
 
   useEffect(() => {
     const checkAuthStatus = async () => {
