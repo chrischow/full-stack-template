@@ -36,4 +36,10 @@ export const authContract = {
     outputStructure: 'detailed',
     tags,
   }),
+  logout: oc.route({
+    method: 'POST',
+    path: '/auth/logout',
+    summary: 'Logs a user out',
+    tags,
+  }),
 }

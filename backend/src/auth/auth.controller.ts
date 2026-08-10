@@ -42,7 +42,7 @@ export class AuthController {
       const { user } = context.request
 
       if (!user) {
-        throw new UnauthorizedException('Not auathorised.')
+        throw new UnauthorizedException('Not authorised.')
       }
 
       context.request.session.user = SessionUserSchema.parse(user)
@@ -51,6 +51,16 @@ export class AuthController {
           location: `${env.APP_DOMAIN}/login/redirect`,
         },
       }
+    })
+  }
+
+  @Implement(contract.auth.logout)
+  logout() {
+    return implement(contract.auth.logout).handler(({ context }) => {
+      const { session } = context.request
+      return session.destroy(() => {
+        return
+      })
     })
   }
 }

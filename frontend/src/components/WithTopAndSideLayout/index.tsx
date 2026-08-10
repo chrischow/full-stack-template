@@ -1,13 +1,15 @@
-import { Avatar, AvatarGroup, Box, HStack, Spacer, Stack, Text } from '@chakra-ui/react'
-import { BiCog, BiHomeAlt } from 'react-icons/bi'
-import { Outlet } from 'react-router'
+import { Avatar, AvatarGroup, Box, Button, HStack, Spacer, Stack, Text } from '@chakra-ui/react'
+import { BiCog, BiHomeAlt, BiLogOut } from 'react-icons/bi'
+import { Outlet, useNavigate } from 'react-router'
 
 import { useAuthContext } from '@/context/auth'
 
 import NavItem from './NavItem'
 
 const WithTopAndSideLayout = () => {
-  const { user } = useAuthContext()
+  const navigate = useNavigate()
+
+  const { user, logout } = useAuthContext()
 
   const navItems = [
     { label: 'Home', to: '/', icon: <BiHomeAlt /> },
@@ -31,6 +33,18 @@ const WithTopAndSideLayout = () => {
           {navItems.map((navItem) => (
             <NavItem key={`nav-item-${navItem.label}`} {...navItem} />
           ))}
+          <Spacer />
+          <Button
+            variant="ghost"
+            colorPalette="red"
+            justifyContent="start"
+            onClick={() => {
+              logout()
+              navigate('/login')
+            }}
+          >
+            <BiLogOut /> Logout
+          </Button>
         </Stack>
         <Box w="full" h="full" px={6} py={4}>
           <Outlet />
