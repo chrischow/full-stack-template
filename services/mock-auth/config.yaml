@@ -6,10 +6,6 @@ web:
   http: 0.0.0.0:5556
 oauth2:
   skipApprovalScreen: true
-connectors:
-  - type: mockCallback
-    id: mock
-    name: Example
 staticClients:
   - id: full-stack-app
     redirectURIs:
