@@ -1,5 +1,4 @@
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 
@@ -19,15 +18,11 @@ const WithProviders = () => {
       },
       queryCache: new QueryCache({
         onError: (error) => {
-          if (!isAxiosError(error)) {
-            toaster.create({
-              id: toastId,
-              description: error.message,
-              type: 'error',
-            })
-
-            return
-          }
+          toaster.create({
+            id: toastId,
+            description: error.message,
+            type: 'error',
+          })
         },
       }),
     }),
