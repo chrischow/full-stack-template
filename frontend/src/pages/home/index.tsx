@@ -13,7 +13,7 @@ const HomePage = () => {
   }
 
   return (
-    <Center w="100vw" h="100vh">
+    <Center w="full" h="full">
       <Heading>Full Stack Template</Heading>
     </Center>
   )
