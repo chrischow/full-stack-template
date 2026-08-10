@@ -12,6 +12,9 @@ const NavItem = ({ label, to, icon }: { label: string; to: string; icon: ReactEl
       colorPalette="gray"
       color={isActive ? 'brand.contrast' : undefined}
       bg={isActive ? 'brand.solid' : undefined}
+      _hover={{
+        bg: isActive ? undefined : 'brand.solid',
+      }}
       asChild
       justifyContent="start"
     >
