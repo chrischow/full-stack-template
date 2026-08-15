@@ -1,7 +1,7 @@
 import { oc } from '@orpc/contract'
 import z from 'zod'
 
-import { SessionUserSchema } from '../schemas'
+import { OtpLoginInputsSchema, OtpResponseSchema, OtpVerifyInputsSchema, SessionUserSchema } from '../schemas'
 
 const tags = ['Auth']
 
@@ -42,4 +42,22 @@ export const authContract = {
     summary: 'Logs a user out',
     tags,
   }),
+  generateOtp: oc
+    .route({
+      method: 'POST',
+      path: '/auth/otp/generate',
+      summary: 'Requests OTP for signup or login',
+      tags,
+    })
+    .input(OtpLoginInputsSchema)
+    .output(OtpResponseSchema),
+  verifyOtp: oc
+    .route({
+      method: 'POST',
+      path: '/auth/otp/verify',
+      summary: 'Verifies ',
+      tags,
+    })
+    .input(OtpVerifyInputsSchema)
+    .output(SessionUserSchema),
 }

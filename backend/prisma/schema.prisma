@@ -21,6 +21,17 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  otp       Otp?
+}
+
+model Otp {
+  id              String   @id @default(uuid(7))
+  value           String
+  canRequestAfter DateTime
+  expiresAt       DateTime
+  email           String   @unique
+  retries         Int      @default(0)
+  user            User     @relation(fields: [email], references: [email])
 }
 
 model Session {

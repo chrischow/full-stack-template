@@ -8,6 +8,7 @@ import WithProviders from '@/components/WithProviders'
 import WithTopAndSideLayout from '@/components/WithTopAndSideLayout'
 import HomePage from '@/pages/home'
 import LoginPage from '@/pages/login'
+import OtpPage from '@/pages/login/otp'
 import LoginRedirectPage from '@/pages/login/redirect'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
             </Route>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/login/otp" element={<OtpPage />} />
             <Route path="/login/redirect" element={<LoginRedirectPage />} />
           </Route>
         </Routes>

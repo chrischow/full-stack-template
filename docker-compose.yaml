@@ -23,7 +23,23 @@ services:
     volumes:
       - ./services/mock-auth/config.yaml:/etc/dex/config.yaml
     command: ["dex", "serve", "/etc/dex/config.yaml"]
-
+  mail:
+    image: axllent/mailpit:v1.30
+    restart: unless-stopped
+    ports:
+      - 8025:8025
+      - 1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+  mock-ses:
+    image: ghcr.io/domdomegg/aws-ses-v2-local
+    restart: unless-stopped
+    ports:
+      - 8005:8005
+    environment:
+      - SMTP_TRANSPORT={"host":"mail","port":1025,"secure":false}
 
 volumes:
   app-pg-data:

@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    if (location.pathname !== '/login') {
+    if (!location.pathname.startsWith('/login')) {
       checkAuthStatus()
     }
   }, [getAuthStatus, navigate, location])

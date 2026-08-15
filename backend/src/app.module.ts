@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module'
 import { validate } from './env/schema'
 import { HealthModule } from './health/health.module'
 import { pinoHttp } from './logger'
+import { MailModule } from './mail/mail.module'
 import { HelmetMiddleware } from './middleware/helmet.middleware'
 import { SessionMiddleware } from './middleware/session.middleware'
 import { PrismaModule } from './prisma/prisma.module'
@@ -47,6 +48,7 @@ import { PrismaModule } from './prisma/prisma.module'
     }),
     PrismaModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

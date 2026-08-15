@@ -6,10 +6,12 @@ import { env } from '@/env/schema'
 import { contract } from '@/shared/contracts'
 import { SessionUserSchema } from '@/shared/schemas'
 
+import { AuthService } from './auth.service'
 import { Public } from './public.decorator'
 
 @Controller()
 export class AuthController {
+  constructor(private readonly authService: AuthService) {}
   @Public()
   @Implement(contract.auth.status)
   status() {
@@ -61,6 +63,25 @@ export class AuthController {
       return session.destroy(() => {
         return
       })
+    })
+  }
+
+  @Public()
+  @Implement(contract.auth.generateOtp)
+  generateOtp() {
+    return implement(contract.auth.generateOtp).handler(async ({ input }) => {
+      const { email } = input
+      return await this.authService.requestOtp({ email })
+    })
+  }
+
+  @Public()
+  @Implement(contract.auth.verifyOtp)
+  verifyOtp() {
+    return implement(contract.auth.verifyOtp).handler(async ({ input, context }) => {
+      const user = await this.authService.verifyOtp(input)
+      context.request.session.user = user
+      return user
     })
   }
 }

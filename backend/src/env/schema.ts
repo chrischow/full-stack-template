@@ -19,11 +19,22 @@ export const EnvSchema = z.object({
   SESSION_SECRET: z.string(),
   SESSION_COOKIE_MAX_AGE: z.coerce.number().default(1000 * 60 * 60 * 24),
 
-  // Auth
+  // OAuth
   OAUTH_BASE_URL: z.string().default('http://localhost:5556/dex'),
   OAUTH_CLIENT_ID: z.string().default('full-stack-app'),
   OAUTH_CLIENT_SECRET: z.string().default('auth-client-secret'),
   OAUTH_CLIENT_CALLBACK_URL: z.string().default('http://localhost:3000/api/v1/auth/oauth/callback'),
+
+  // OTP
+  OTP_REQUEST_TIMEOUT_SECONDS: z.string().transform(Number).default(60),
+  OTP_VALIDITY_SECONDS: z.string().transform(Number).default(300),
+  OTP_MAX_RETRIES: z.string().transform(Number).default(5),
+
+  // AWS
+  AWS_REGION: z.string().default('ap-southeast-1'),
+  AWS_ACCESS_KEY_ID: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
+  AWS_SES_ENDPOINT: z.string(),
 })
 
 export type Env = z.infer<typeof EnvSchema>
