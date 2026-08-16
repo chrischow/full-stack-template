@@ -38,6 +38,7 @@ import {
 } from '@/shared/schemas'
 
 import { OtpSchema } from './auth.schema'
+import { computeHmac } from './utils'
 
 @Injectable()
 export class AuthService {
@@ -104,40 +105,41 @@ export class AuthService {
     }
 
     const otpKey = `otp:${user.id}`
+    const otpHash = computeHmac(otpValue)
     const otp = await this.appCache.get({ key: otpKey, schema: OtpSchema, errMsg, action })
 
     // No OTP: Can generate
     if (!otp) {
-      await sendOtp().then(async () => {
-        await this.appCache.set({
-          key: otpKey,
-          value: { value: otpValue, retries: 0 },
-          ttl: env.OTP_VALIDITY_SECONDS * 1000,
-          errMsg,
-          action,
+      await this.appCache.set({
+        key: otpKey,
+        value: { value: otpHash, retries: 0 },
+        ttl: env.OTP_VALIDITY_SECONDS * 1000,
+        errMsg,
+        action,
+      })
+
+      await this.prisma.user
+        .update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            lastRequestedAt: now,
+          },
+        })
+        .catch((error: unknown) => {
+          throw new InternalServerErrorException(errMsg, {
+            cause: {
+              action,
+              message: 'Could not create OTP - DB error',
+              meta: {
+                error,
+              },
+            },
+          })
         })
 
-        await this.prisma.user
-          .update({
-            where: {
-              id: user.id,
-            },
-            data: {
-              lastRequestedAt: now,
-            },
-          })
-          .catch((error: unknown) => {
-            throw new InternalServerErrorException(errMsg, {
-              cause: {
-                action,
-                message: 'Could not create OTP - DB error',
-                meta: {
-                  error,
-                },
-              },
-            })
-          })
-      })
+      await sendOtp()
 
       return response
     }
@@ -146,15 +148,15 @@ export class AuthService {
     const requestAfter = addSeconds(user.lastRequestedAt ?? now, env.OTP_REQUEST_TIMEOUT_SECONDS)
     const canRequest = isAfter(new Date(), requestAfter)
     if (canRequest) {
-      await sendOtp().then(async () => {
-        await this.appCache.set({
-          key: otpKey,
-          value: { value: otpValue, retries: 0 },
-          ttl: env.OTP_VALIDITY_SECONDS * 1000,
-          errMsg,
-          action,
-        })
+      await this.appCache.set({
+        key: otpKey,
+        value: { value: otpHash, retries: 0 },
+        ttl: env.OTP_VALIDITY_SECONDS * 1000,
+        errMsg,
+        action,
       })
+
+      await sendOtp()
 
       return response
     }
@@ -228,7 +230,9 @@ export class AuthService {
       })
     }
 
-    if (currentOtp.value !== otp) {
+    const currentOtpHash = computeHmac(currentOtp.value)
+
+    if (crypto.timingSafeEqual(Buffer.from(currentOtpHash, 'hex'), Buffer.from(computeHmac(otp), 'hex'))) {
       const remainingTtl = await this.appCache.getRemainingTtl({ key: otpKey, errMsg, action })
 
       if (remainingTtl === 0) {

@@ -11,7 +11,7 @@ export const EnvSchema = z.object({
   APP_NAME: z.string(),
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.string().transform(Number).default(5432),
-  DB_NAME: z.string().default('panel'),
+  DB_NAME: z.string().default('app'),
   DB_USERNAME: z.string(),
   DB_PASSWORD: z.string(),
   KV_TTL_SECONDS: z.string().transform(Number).default(300),
@@ -31,6 +31,7 @@ export const EnvSchema = z.object({
   OTP_REQUEST_TIMEOUT_SECONDS: z.string().transform(Number).default(60),
   OTP_VALIDITY_SECONDS: z.string().transform(Number).default(300),
   OTP_MAX_RETRIES: z.string().transform(Number).default(5),
+  OTP_SECRET: z.string(),
 
   // AWS
   AWS_REGION: z.string().default('ap-southeast-1'),
