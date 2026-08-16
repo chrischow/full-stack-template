@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router'
 
 import { BACKEND_PREFIX } from '@/app/constants'
 
+import PasskeyLoginButton from './PasskeyLoginButton'
+
 const LoginPage = () => {
   const navigate = useNavigate()
 
@@ -32,6 +34,7 @@ const LoginPage = () => {
             >
               <HiOutlineMail /> Request an OTP
             </Button>
+            <PasskeyLoginButton />
           </Stack>
         </Card.Body>
       </Card.Root>

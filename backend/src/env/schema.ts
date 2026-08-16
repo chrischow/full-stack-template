@@ -8,6 +8,7 @@ export const EnvSchema = z.object({
   NODE_ENV: z.enum(['local', 'development', 'test', 'staging', 'production']).default('development'),
   APP_PORT: z.string().transform(Number).default(8080),
   APP_DOMAIN: z.string().default('http://localhost:3000'),
+  APP_NAME: z.string(),
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.string().transform(Number).default(5432),
   DB_NAME: z.string().default('panel'),
@@ -35,6 +36,13 @@ export const EnvSchema = z.object({
   AWS_ACCESS_KEY_ID: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
   AWS_SES_ENDPOINT: z.string(),
+
+  // Passkey
+  PASSKEY_RP_ID: z.string(),
+  PASSKEY_ORIGIN: z.string(),
+  PASSKEY_REGISTER_TIMEOUT_SECONDS: z.string().transform(Number).default(120),
+  PASSKEY_AUTHN_TIMEOUT_SECONDS: z.string().transform(Number).default(120),
+  PASSKEY_VERIFICATION_DAYS: z.string().transform(Number).default(60),
 })
 
 export type Env = z.infer<typeof EnvSchema>

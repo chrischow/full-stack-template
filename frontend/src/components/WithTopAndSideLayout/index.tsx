@@ -11,10 +11,7 @@ const WithTopAndSideLayout = () => {
 
   const { user, logout } = useAuthContext()
 
-  const navItems = [
-    { label: 'Home', to: '/', icon: <BiHomeAlt /> },
-    { label: 'Settings', to: '/settings', icon: <BiCog /> },
-  ]
+  const navItems = [{ label: 'Home', to: '/', icon: <BiHomeAlt /> }]
 
   return (
     <Stack w="100vw" h="100vh" gap={0}>
@@ -34,6 +31,9 @@ const WithTopAndSideLayout = () => {
             <NavItem key={`nav-item-${navItem.label}`} {...navItem} />
           ))}
           <Spacer />
+          <Button variant="subtle" justifyContent="start" onClick={() => navigate('/account')}>
+            <BiCog /> Account Settings
+          </Button>
           <Button
             variant="ghost"
             colorPalette="red"

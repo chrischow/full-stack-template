@@ -35,9 +35,17 @@ const config = defineConfig({
     semanticTokens: {
       colors: {
         bg: {
-          value: {
-            _light: '#ffffff',
-            _dark: '{colors.slate.700}',
+          DEFAULT: {
+            value: {
+              _light: '#ffffff',
+              _dark: '{colors.slate.700}',
+            },
+          },
+          panel: {
+            value: {
+              _light: '#ffffff',
+              _dark: '{colors.slate.700}',
+            },
           },
         },
         brand: {

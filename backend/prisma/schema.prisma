@@ -14,14 +14,16 @@ datasource db {
 }
 
 model User {
-  id    String @id @default(uuid(7))
-  name  String
-  email String @unique
+  id             String    @id @default(uuid(7)) @db.Uuid
+  name           String
+  email          String    @unique
+  lastVerifiedAt DateTime?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   otp       Otp?
+  passkeys  Passkey[]
 }
 
 model Otp {
@@ -32,6 +34,24 @@ model Otp {
   email           String   @unique
   retries         Int      @default(0)
   user            User     @relation(fields: [email], references: [email])
+}
+
+model Passkey {
+  id             String   @id
+  publicKey      Bytes
+  userId         String   @db.Uuid
+  webAuthnUserId String
+  counter        Int
+  deviceType     String
+  backedUp       Boolean
+  transports     String[]
+
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([webAuthnUserId, userId])
 }
 
 model Session {

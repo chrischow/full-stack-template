@@ -7,7 +7,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 
 @Injectable()
 export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prisma: PrismaService) {
     super({
       issuer: `${env.OAUTH_BASE_URL}`,
       authorizationURL: `${env.OAUTH_BASE_URL}/auth`,
@@ -34,7 +34,7 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
       return done(new UnauthorizedException('No emails to authorise.'), undefined)
     }
 
-    const user = await this.prismaService.user
+    const user = await this.prisma.user
       .findUnique({ select: { id: true, name: true, email: true }, where: { email } })
       .catch((error: unknown) => {
         return done(

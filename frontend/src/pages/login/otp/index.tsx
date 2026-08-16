@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router'
 import { orpc } from '@/app/orpc-client'
 import { toaster } from '@/components/ui/toaster'
 import { useAuthContext } from '@/context/auth'
-import { OtpLoginInputsSchema, OtpResponseSchema } from '~shared/schemas'
+import { EmailLoginInputsSchema, OtpResponseSchema } from '~shared/schemas'
 
 const OtpPage = () => {
   const navigate = useNavigate()
@@ -19,12 +19,12 @@ const OtpPage = () => {
   const [canRequestAfter, setCanRequestAfter] = useState<Date>()
 
   const { mutateAsync: requestOtp, isPending: isOtpRequestPending } = useMutation(
-    orpc.auth.generateOtp.mutationOptions({
+    orpc.auth.otp.generate.mutationOptions({
       onSuccess: (response) => {
         const { success, data } = OtpResponseSchema.safeParse(response)
         if (!success) {
           toaster.create({
-            description: <Text color="critical.solid">Failed to generate OTP.</Text>,
+            description: <Text color="fg.error">Failed to generate OTP.</Text>,
             duration: 3000,
           })
           return
@@ -36,10 +36,10 @@ const OtpPage = () => {
   )
 
   const { mutateAsync: verifyOtp, isPending: isOtpVerifyPending } = useMutation(
-    orpc.auth.verifyOtp.mutationOptions({
+    orpc.auth.otp.verify.mutationOptions({
       onSuccess: (user) => {
         toaster.create({
-          description: <Text color="success.solid">Logged in successfully.</Text>,
+          description: <Text color="fg.success">Logged in successfully.</Text>,
           duration: 3000,
         })
 
@@ -51,13 +51,13 @@ const OtpPage = () => {
         setOtp(['', '', '', '', '', ''])
         if (error instanceof ORPCError) {
           toaster.create({
-            description: <Text color="critical.solid">{error.data.body.message}</Text>,
+            description: <Text color="fg.error">{error.data.body.message}</Text>,
             duration: 3000,
           })
           return
         }
         toaster.create({
-          description: <Text color="critical.solid">Failed to validate OTP. Please try again.</Text>,
+          description: <Text color="fg.error">Failed to validate OTP. Please try again.</Text>,
           duration: 3000,
         })
       },
@@ -65,10 +65,10 @@ const OtpPage = () => {
   )
 
   const handleRequestOtp = async () => {
-    const { success } = OtpLoginInputsSchema.safeParse({ email })
+    const { success } = EmailLoginInputsSchema.safeParse({ email })
     if (!success) {
       toaster.create({
-        description: <Text color="critical.solid">Please input a valid email.</Text>,
+        description: <Text color="fg.error">Please input a valid email.</Text>,
         duration: 3000,
       })
       return
@@ -81,7 +81,7 @@ const OtpPage = () => {
     const fullOtp = otp.join('')
     if (fullOtp.length !== 6) {
       toaster.create({
-        description: <Text color="critical.solid">Invalid OTP.</Text>,
+        description: <Text color="fg.error">Invalid OTP.</Text>,
         duration: 3000,
       })
     }
@@ -152,13 +152,13 @@ const OtpPage = () => {
                         if (canRequestOtp) {
                           handleRequestOtp()
                           toaster.create({
-                            description: <Text color="success.solid">Requested a new OTP.</Text>,
+                            description: <Text color="fg.success">Requested a new OTP.</Text>,
                             duration: 3000,
                           })
                           return
                         } else {
                           toaster.create({
-                            description: <Text color="critical.solid">Cannot request OTP yet.</Text>,
+                            description: <Text color="fg.error">Cannot request OTP yet.</Text>,
                             duration: 3000,
                           })
                         }

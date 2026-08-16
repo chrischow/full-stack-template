@@ -39,6 +39,7 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@quixo3/prisma-session-store": "^3.1.21",
+    "@simplewebauthn/server": "^13.3.2",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.1",
     "dotenv-cli": "^11.0.0",

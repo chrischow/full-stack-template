@@ -1,7 +1,17 @@
 import { oc } from '@orpc/contract'
 import z from 'zod'
 
-import { OtpLoginInputsSchema, OtpResponseSchema, OtpVerifyInputsSchema, SessionUserSchema } from '../schemas'
+import {
+  EmailLoginInputsSchema,
+  ListPasskeysSchema,
+  OtpResponseSchema,
+  OtpVerifyInputsSchema,
+  PasskeyAuthenticationInputsSchema,
+  PasskeyAuthenticationOptionsSchema,
+  PasskeyRegistrationInputsSchema,
+  PasskeyRegistrationOptionsSchema,
+  SessionUserSchema,
+} from '../schemas'
 
 const tags = ['Auth']
 
@@ -22,42 +32,102 @@ export const authContract = {
       tags,
     })
     .output(SessionUserSchema),
-  oauth: oc.route({
-    method: 'GET',
-    path: '/auth/oauth',
-    summary: 'Initiates OAuth',
-    tags,
-  }),
-  oauthRedirect: oc.route({
-    method: 'GET',
-    path: '/auth/oauth/redirect',
-    summary: 'OAuth redirect URL',
-    successStatus: 302,
-    outputStructure: 'detailed',
-    tags,
-  }),
   logout: oc.route({
     method: 'POST',
     path: '/auth/logout',
     summary: 'Logs a user out',
     tags,
   }),
-  generateOtp: oc
-    .route({
-      method: 'POST',
-      path: '/auth/otp/generate',
-      summary: 'Requests OTP for signup or login',
+  oauth: {
+    login: oc.route({
+      method: 'GET',
+      path: '/auth/oauth',
+      summary: 'Initiates OAuth',
       tags,
-    })
-    .input(OtpLoginInputsSchema)
-    .output(OtpResponseSchema),
-  verifyOtp: oc
-    .route({
-      method: 'POST',
-      path: '/auth/otp/verify',
-      summary: 'Verifies ',
+    }),
+    redirect: oc.route({
+      method: 'GET',
+      path: '/auth/oauth/redirect',
+      summary: 'OAuth redirect URL',
+      successStatus: 302,
+      outputStructure: 'detailed',
       tags,
-    })
-    .input(OtpVerifyInputsSchema)
-    .output(SessionUserSchema),
+    }),
+  },
+  otp: {
+    generate: oc
+      .route({
+        method: 'POST',
+        path: '/auth/otp/generate',
+        summary: 'Requests OTP for signup or login',
+        tags,
+      })
+      .input(EmailLoginInputsSchema)
+      .output(OtpResponseSchema),
+    verify: oc
+      .route({
+        method: 'POST',
+        path: '/auth/otp/verify',
+        summary: 'Verifies ',
+        tags,
+      })
+      .input(OtpVerifyInputsSchema)
+      .output(SessionUserSchema),
+  },
+  passkeys: {
+    list: oc
+      .route({
+        method: 'GET',
+        path: '/auth/passkeys',
+        summary: "Lists the authenticated user's passkeys",
+        tags,
+      })
+      .output(ListPasskeysSchema),
+    revoke: oc
+      .route({
+        method: 'POST',
+        path: '/auth/passkeys/{passkeyId}/revoke',
+        summary: "Lists the authenticated user's passkeys",
+        tags,
+      })
+      .input(z.object({ passkeyId: z.string() })),
+    register: {
+      start: oc
+        .route({
+          method: 'POST',
+          path: '/auth/passkeys/register',
+          summary: 'Starts registration for Passkey',
+          tags,
+        })
+        .output(PasskeyRegistrationOptionsSchema),
+      verify: oc
+        .route({
+          method: 'POST',
+          path: '/auth/passkeys/register/verify',
+          summary: 'Completes verification of Passkey',
+          tags,
+        })
+        .input(PasskeyRegistrationInputsSchema)
+        .output(z.boolean()),
+    },
+    login: {
+      start: oc
+        .route({
+          method: 'GET',
+          path: '/auth/passkeys/login',
+          summary: 'Starts login via Passkey',
+          tags,
+        })
+        .output(z.object({ identifier: z.uuidv4(), options: PasskeyAuthenticationOptionsSchema })),
+      verify: oc
+        .route({
+          method: 'POST',
+          path: '/auth/passkeys/login/verify',
+          summary: 'Completes login via Passkey',
+          tags,
+        })
+        .input(PasskeyAuthenticationInputsSchema)
+        .output(SessionUserSchema),
+    },
+  },
 }

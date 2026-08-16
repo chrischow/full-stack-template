@@ -31,16 +31,16 @@ export class AuthController {
 
   @Public()
   @UseGuards(AuthGuard('oauth'))
-  @Implement(contract.auth.oauth)
+  @Implement(contract.auth.oauth.login)
   oauthGoogle() {
-    return implement(contract.auth.oauth).handler(() => {})
+    return implement(contract.auth.oauth.login).handler(() => {})
   }
 
   @Public()
   @UseGuards(AuthGuard('oauth'))
-  @Implement(contract.auth.oauthRedirect)
+  @Implement(contract.auth.oauth.redirect)
   oauthGoogleRedirect() {
-    return implement(contract.auth.oauthRedirect).handler(({ context }) => {
+    return implement(contract.auth.oauth.redirect).handler(({ context }) => {
       const { user } = context.request
 
       if (!user) {
@@ -67,21 +67,72 @@ export class AuthController {
   }
 
   @Public()
-  @Implement(contract.auth.generateOtp)
+  @Implement(contract.auth.otp.generate)
   generateOtp() {
-    return implement(contract.auth.generateOtp).handler(async ({ input }) => {
+    return implement(contract.auth.otp.generate).handler(async ({ input }) => {
       const { email } = input
       return await this.authService.requestOtp({ email })
     })
   }
 
   @Public()
-  @Implement(contract.auth.verifyOtp)
+  @Implement(contract.auth.otp.verify)
   verifyOtp() {
-    return implement(contract.auth.verifyOtp).handler(async ({ input, context }) => {
+    return implement(contract.auth.otp.verify).handler(async ({ input, context }) => {
       const user = await this.authService.verifyOtp(input)
       context.request.session.user = user
       return user
+    })
+  }
+
+  @Implement(contract.auth.passkeys.register.start)
+  registerPasskey() {
+    return implement(contract.auth.passkeys.register.start).handler(async ({ context }) => {
+      const { user } = context.request.session
+      return await this.authService.generatePasskeyRegistrationOptions({ user })
+    })
+  }
+
+  @Implement(contract.auth.passkeys.register.verify)
+  verifyPasskeyRegistration() {
+    return implement(contract.auth.passkeys.register.verify).handler(async ({ context, input }) => {
+      const { user } = context.request.session
+      return await this.authService.verifyPasskeyRegistration({ user, credentials: input })
+    })
+  }
+
+  @Public()
+  @Implement(contract.auth.passkeys.login.start)
+  passkeyLogin() {
+    return implement(contract.auth.passkeys.login.start).handler(async () => {
+      return await this.authService.generatePasskeyLoginOptions()
+    })
+  }
+
+  @Public()
+  @Implement(contract.auth.passkeys.login.verify)
+  verifyPasskeyLogin() {
+    return implement(contract.auth.passkeys.login.verify).handler(async ({ context, input }) => {
+      const user = await this.authService.verifyPasskeyLogin(input)
+      context.request.session.user = user
+      return user
+    })
+  }
+
+  @Implement(contract.auth.passkeys.list)
+  listPasskeys() {
+    return implement(contract.auth.passkeys.list).handler(async ({ context }) => {
+      const { user } = context.request.session
+      return await this.authService.listPasskeys({ user })
+    })
+  }
+
+  @Implement(contract.auth.passkeys.revoke)
+  revokePasskey() {
+    return implement(contract.auth.passkeys.revoke).handler(async ({ context, input }) => {
+      const { user } = context.request.session
+      const { passkeyId } = input
+      return await this.authService.revokePasskey({ user, passkeyId })
     })
   }
 }
