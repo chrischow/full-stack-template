@@ -14,26 +14,16 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  name           String
-  email          String    @unique
-  lastVerifiedAt DateTime?
+  id              String    @id @default(uuid(7)) @db.Uuid
+  name            String
+  email           String    @unique
+  lastVerifiedAt  DateTime?
+  lastRequestedAt DateTime?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  otp       Otp?
   passkeys  Passkey[]
-}
-
-model Otp {
-  id              String   @id @default(uuid(7))
-  value           String
-  canRequestAfter DateTime
-  expiresAt       DateTime
-  email           String   @unique
-  retries         Int      @default(0)
-  user            User     @relation(fields: [email], references: [email])
 }
 
 model Passkey {

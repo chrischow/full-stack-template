@@ -3,6 +3,7 @@ import { ORPCError } from '@orpc/client'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BiPlus } from 'react-icons/bi'
+import { IoMdFingerPrint } from 'react-icons/io'
 
 import { orpc } from '@/app/orpc-client'
 import { toaster } from '@/components/ui/toaster'
@@ -45,10 +46,14 @@ const AccountSettingsPage = () => {
     <Stack px={6} py={4} gap={6} w="100%">
       <Heading size="3xl">Account</Heading>
       <Stack gap={4}>
-        <HStack w="100%" align="center" gap={3}>
-          <Heading size="xl">Passkeys</Heading>
+        <HStack w="100%" align="center" gap={4}>
+          <Heading size="xl">
+            <HStack gap={1}>
+              <IoMdFingerPrint /> Passkeys
+            </HStack>
+          </Heading>
           <Button
-            size="xs"
+            size="2xs"
             variant="surface"
             onClick={() => registerPasskey({ email: user.email })}
             loading={isPasskeyRegistrationPending}
@@ -56,7 +61,7 @@ const AccountSettingsPage = () => {
             <BiPlus /> Add
           </Button>
         </HStack>
-        {!isPasskeysPending && (!passkeys || passkeys.passkeys.length === 0) && (
+        {!isPasskeysPending && (!passkeys || passkeys.length === 0) && (
           <Center>
             <Text fontSize="sm" color="fg.subtle">
               No passkeys created.
@@ -65,7 +70,7 @@ const AccountSettingsPage = () => {
         )}
         <Stack gap={2} w="100%">
           {passkeys &&
-            passkeys.passkeys.map((pk) => {
+            passkeys.map((pk) => {
               return (
                 <HStack key={pk.id} px={3} py={2} rounded="md" w="100%" borderWidth="1px">
                   <Text fontSize="sm" color="fg.muted">

@@ -14,6 +14,7 @@ export const EnvSchema = z.object({
   DB_NAME: z.string().default('panel'),
   DB_USERNAME: z.string(),
   DB_PASSWORD: z.string(),
+  KV_TTL_SECONDS: z.string().transform(Number).default(300),
 
   // Session
   SESSION_NAME: z.string(),

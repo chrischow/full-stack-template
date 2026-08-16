@@ -1,3 +1,5 @@
+import { KeyvPostgres } from '@keyv/postgres'
+import { CacheModule } from '@nestjs/cache-manager'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { REQUEST } from '@nestjs/core'
@@ -8,8 +10,9 @@ import { LoggerModule } from 'nestjs-pino'
 
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { AppCacheModule } from './app_cache/app_cache.module'
 import { AuthModule } from './auth/auth.module'
-import { validate } from './env/schema'
+import { env, validate } from './env/schema'
 import { HealthModule } from './health/health.module'
 import { pinoHttp } from './logger'
 import { MailModule } from './mail/mail.module'
@@ -22,6 +25,21 @@ import { PrismaModule } from './prisma/prisma.module'
     ConfigModule.forRoot({
       isGlobal: true,
       validate,
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: () => {
+        const postgresUri = `postgresql://${env.DB_USERNAME}:${env.DB_PASSWORD}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
+        return {
+          stores: [
+            new KeyvPostgres({
+              uri: postgresUri,
+              table: 'app_cache',
+            }),
+          ],
+          ttl: env.KV_TTL_SECONDS * 1000,
+        }
+      },
     }),
     HealthModule,
     LoggerModule.forRoot({ pinoHttp }),
@@ -49,6 +67,7 @@ import { PrismaModule } from './prisma/prisma.module'
     PrismaModule,
     AuthModule,
     MailModule,
+    AppCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService],

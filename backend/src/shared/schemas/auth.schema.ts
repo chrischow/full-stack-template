@@ -153,8 +153,3 @@ export const PasskeySchema = z.object({
   name: z.string(),
 })
 export type Passkey = z.infer<typeof PasskeySchema>
-
-export const ListPasskeysSchema = z.object({
-  passkeys: z.array(PasskeySchema),
-})
-export type ListPasskeys = z.infer<typeof ListPasskeysSchema>

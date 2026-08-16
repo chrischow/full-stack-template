@@ -3,13 +3,13 @@ import z from 'zod'
 
 import {
   EmailLoginInputsSchema,
-  ListPasskeysSchema,
   OtpResponseSchema,
   OtpVerifyInputsSchema,
   PasskeyAuthenticationInputsSchema,
   PasskeyAuthenticationOptionsSchema,
   PasskeyRegistrationInputsSchema,
   PasskeyRegistrationOptionsSchema,
+  PasskeySchema,
   SessionUserSchema,
 } from '../schemas'
 
@@ -82,7 +82,7 @@ export const authContract = {
         summary: "Lists the authenticated user's passkeys",
         tags,
       })
-      .output(ListPasskeysSchema),
+      .output(z.array(PasskeySchema)),
     revoke: oc
       .route({
         method: 'POST',
