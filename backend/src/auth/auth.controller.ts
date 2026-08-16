@@ -7,11 +7,17 @@ import { contract } from '@/shared/contracts'
 import { SessionUserSchema } from '@/shared/schemas'
 
 import { AuthService } from './auth.service'
+import { OtpService } from './otp.service'
+import { PasskeyService } from './passkey.service'
 import { Public } from './public.decorator'
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly otpService: OtpService,
+    private readonly passkeyService: PasskeyService,
+  ) {}
   @Public()
   @Implement(contract.auth.status)
   status() {
@@ -71,7 +77,7 @@ export class AuthController {
   generateOtp() {
     return implement(contract.auth.otp.generate).handler(async ({ input }) => {
       const { email } = input
-      return await this.authService.requestOtp({ email })
+      return await this.otpService.requestOtp({ email })
     })
   }
 
@@ -79,7 +85,7 @@ export class AuthController {
   @Implement(contract.auth.otp.verify)
   verifyOtp() {
     return implement(contract.auth.otp.verify).handler(async ({ input, context }) => {
-      const user = await this.authService.verifyOtp(input)
+      const user = await this.otpService.verifyOtp(input)
       context.request.session.user = user
       return user
     })
@@ -89,7 +95,7 @@ export class AuthController {
   registerPasskey() {
     return implement(contract.auth.passkeys.register.start).handler(async ({ context }) => {
       const { user } = context.request.session
-      return await this.authService.generatePasskeyRegistrationOptions({ user })
+      return await this.passkeyService.generatePasskeyRegistrationOptions({ user })
     })
   }
 
@@ -97,7 +103,7 @@ export class AuthController {
   verifyPasskeyRegistration() {
     return implement(contract.auth.passkeys.register.verify).handler(async ({ context, input }) => {
       const { user } = context.request.session
-      return await this.authService.verifyPasskeyRegistration({ user, credentials: input })
+      return await this.passkeyService.verifyPasskeyRegistration({ user, credentials: input })
     })
   }
 
@@ -105,7 +111,7 @@ export class AuthController {
   @Implement(contract.auth.passkeys.login.start)
   passkeyLogin() {
     return implement(contract.auth.passkeys.login.start).handler(async () => {
-      return await this.authService.generatePasskeyLoginOptions()
+      return await this.passkeyService.generatePasskeyLoginOptions()
     })
   }
 
@@ -113,7 +119,7 @@ export class AuthController {
   @Implement(contract.auth.passkeys.login.verify)
   verifyPasskeyLogin() {
     return implement(contract.auth.passkeys.login.verify).handler(async ({ context, input }) => {
-      const user = await this.authService.verifyPasskeyLogin(input)
+      const user = await this.passkeyService.verifyPasskeyLogin(input)
       context.request.session.user = user
       return user
     })

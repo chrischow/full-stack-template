@@ -3,11 +3,12 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Profile, Strategy, VerifyCallback } from 'passport-openidconnect'
 
 import { env } from '@/env/schema'
-import { PrismaService } from '@/prisma/prisma.service'
+import { SessionUserSchema } from '@/shared/schemas'
+import { UserService } from '@/user/user.service'
 
 @Injectable()
 export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(private readonly userService: UserService) {
     super({
       issuer: `${env.OAUTH_BASE_URL}`,
       authorizationURL: `${env.OAUTH_BASE_URL}/auth`,
@@ -34,22 +35,7 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
       return done(new UnauthorizedException('No emails to authorise.'), undefined)
     }
 
-    const user = await this.prisma.user
-      .findUnique({ select: { id: true, name: true, email: true }, where: { email } })
-      .catch((error: unknown) => {
-        return done(
-          new InternalServerErrorException('Could not verify user.', {
-            cause: {
-              message: 'Could not retrieve user for authentication - DB error.',
-              action: 'OAuthStrategy',
-              meta: {
-                error,
-              },
-            },
-          }),
-          undefined,
-        )
-      })
+    const user = await this.userService.findUserByEmail({ email })
 
     if (!user) {
       return done(
@@ -66,6 +52,15 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
       )
     }
 
-    return done(null, user)
+    const { success, data: validatedUser } = SessionUserSchema.safeParse(user)
+    if (!success) {
+      throw new InternalServerErrorException('Could not verify user.', {
+        cause: {
+          email,
+        },
+      })
+    }
+
+    return done(null, validatedUser)
   }
 }

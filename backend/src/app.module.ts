@@ -19,6 +19,7 @@ import { MailModule } from './mail/mail.module'
 import { HelmetMiddleware } from './middleware/helmet.middleware'
 import { SessionMiddleware } from './middleware/session.middleware'
 import { PrismaModule } from './prisma/prisma.module'
+import { UserModule } from './user/user.module'
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { PrismaModule } from './prisma/prisma.module'
     AuthModule,
     MailModule,
     AppCacheModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
