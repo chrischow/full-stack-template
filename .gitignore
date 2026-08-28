@@ -29,9 +29,6 @@ terraform.rc
 # Debug logs
 terragrunt-debug.tfvars.json
 
-# Lambda Function Pacakge files
-packages
-
 # Lambda Layer package & dependencies
 layers/
 
