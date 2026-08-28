@@ -1,0 +1,20 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*", "tsconfig*.json", "vite.config.*"],
+      "outputs": ["dist/**"],
+      "passThroughEnv": ["VITE_*"]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": ["src/**/*.ts", "tsconfig*.json", "vite.config.*", "eslint.config.mjs"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

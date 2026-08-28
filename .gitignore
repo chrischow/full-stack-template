@@ -37,3 +37,6 @@ layers/
 
 # Helm chart archive files
 *.tgz
+
+# Turborepo
+.turbo

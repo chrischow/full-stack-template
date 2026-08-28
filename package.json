@@ -4,15 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "turbo dev",
     "dev:infra:start": "docker-compose up -d --wait",
     "dev:infra:stop": "docker-compose stop",
     "dev:infra:down": "docker-compose down -v --remove-orphans",
     "commitlint": "commitlint --edit $1",
-    "lint": "eslint . --fix",
-    "format": "prettier --write 'frontend/**/*.{ts,tsx,js,jsx}' 'backend/**/*.{ts,js}'",
+    "lint": "turbo lint --continue",
+    "lint:fix": "turbo lint --continue -- -- --fix",
+    "format": "prettier --write 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky",
-    "postinstall": "npm --prefix backend install && npm --prefix frontend install"
+    "prepare": "husky"
   },
   "author": "",
   "license": "ISC",
@@ -21,24 +22,32 @@
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "globals": "^17.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.2",
+    "turbo": "^2.10.12",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.1"
   },
   "lint-staged": {
     "**/*.(js|jsx|ts|tsx)": [
-      "eslint --fix",
+      "turbo run lint --continue -- --fix",
       "npm run format"
     ]
   },
   "dependencies": {
     "zod": "^4.3.6"
-  }
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "10.9.8"
+    }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
