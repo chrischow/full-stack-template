@@ -1,0 +1,38 @@
+# Dependencies (Always install fresh inside the container)
+**/node_modules/
+**/bower_components/
+
+# Environment Secrets & Credentials
+**/.env
+**/.env.local
+**/.env.production
+**/.env.*
+**/.aws/
+**/.npmrc
+
+# Version Control
+**/.git
+**/.gitignore
+**/.hg
+**/.svn
+
+# Build Artifacts, Cache, and Outputs
+**/dist/
+**/build/
+**/.next/
+**/.cache/
+**/.npm/
+**/coverage/
+**/.nyc_output/
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# IDE & System Files
+**/.vscode/
+**/.idea/
+**/.DS_Store
+**/Thumbs.db

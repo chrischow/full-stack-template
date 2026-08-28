@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "turbo build",
     "dev": "turbo dev",
     "dev:infra:start": "docker-compose up -d --wait",
     "dev:infra:stop": "docker-compose stop",
