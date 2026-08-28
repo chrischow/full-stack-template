@@ -4,7 +4,7 @@ This document serves as an index for (1) guidelines on contributing features and
 ## General
 
 - [Guidelines for writing commit messages](./general/writing-commit-messages.md)
-- [Outline of app architecture]()
+- [Outline of app architecture](./general/app-architecture.md)
 
 ## App: Backend
 
