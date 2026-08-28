@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
+    "check-types": "tsc --noEmit",
     "preview": "vite preview",
     "postinstall": "chakra typegen ./src/theme/index.ts"
   },

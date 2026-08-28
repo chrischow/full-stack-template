@@ -12,6 +12,9 @@
       "cache": true,
       "inputs": ["src/**/*.ts", "tsconfig*.json", "vite.config.*", "eslint.config.mjs"]
     },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,

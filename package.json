@@ -12,6 +12,7 @@
     "commitlint": "commitlint --edit $1",
     "lint": "turbo lint --continue",
     "lint:fix": "turbo lint --continue -- -- --fix",
+    "check-types": "turbo check-types --continue",
     "format": "prettier --write 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
