@@ -1,0 +1,85 @@
+# Full Stack Template
+
+A full stack template for bootstrapping maintainable and policy-compliant (WIP) web apps that enable developers to build fast.
+
+## Key Features and Tools
+
+### App
+
+- End-to-end type safety:
+  - Type-safe queries with [Prisma](https://www.prisma.io/)
+  - Server-side runtime validation with [Zod](https://zod.dev/)
+  - Type-safe APIs with [oRPC](https://orpc.dev/) on the [server](https://orpc.dev/docs/openapi/integrations/implement-contract-in-nest) and [client](https://orpc.dev/docs/openapi/getting-started)
+- Clear, standardised architecture with [NestJS](https://nestjs.com/)
+- Passwordless authentication:
+  - OpenID-connect with Google OAuth
+  - Email OTP
+  - [Passkey authentication](https://safety.google/safety/authentication/passkey/) with configurable email re-verification requirement
+- Secure session management
+
+### Supporting Services
+
+- [Dex IdP](https://dexidp.io/): OpenID Connect provider
+- [Mailpit](https://mailpit.axllent.org/): Lightweight email testing tool
+
+## Setup
+
+### Pre-requisites
+
+1. Install `nvm` using the the [official instructions](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Install [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/)
+
+### Dependencies
+Install dependencies by running `npm i`.
+
+
+## Usage
+
+### Starting the App
+Launch supporting services with `npm run dev:infra:start`.
+
+Start the backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+Start the frontend in another shell:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Access the app and supporting services at the following URLs:
+
+- Frontend w/ proxy to backend: http://localhost:3000
+- Backend: http://localhost:8080
+- Mailpit inbox: http://localhost:8025
+- Dex IdP: http://localhost:5556/dex - mainly for auth redirect
+
+### Updating the DB Schema (Development)
+After amending the schema in `backend/prisma/schema.prisma`:
+
+- For quick incremental changes, run `npm run db:sync`
+- For a complete reset, run `npm run db:reset && npm run db:sync`
+
+Thereafter, run seeds as required:
+
+```bash
+npm run db:seed:run
+```
+
+### Creating Migrations
+Generate a migration with `npm run db:migration:gen` and provide a name in `snake-case`.
+
+Then, run the migrations with `npm run db:migration:run`.
+
+Finally, re-generate the Prisma client with `npx prisma generate`.
+
+### Seeding the DB
+Amend `backend/prisma/seed.ts`, then run `npm run db:seed:run`.
+
+## Development
+Refer to the [Development docs](./docs/index.md).
