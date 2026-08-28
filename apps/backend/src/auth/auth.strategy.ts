@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
+import { SessionUserSchema } from '@repo/api-contract/schemas'
 import { Profile, Strategy, VerifyCallback } from 'passport-openidconnect'
 
 import { env } from '@/env/schema'
-import { SessionUserSchema } from '@/shared/schemas'
 import { UserService } from '@/user/user.service'
 
 @Injectable()

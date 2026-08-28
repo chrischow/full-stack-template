@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
+import { Passkey, PasskeySchema, SessionUser } from '@repo/api-contract/schemas'
 import { format } from 'date-fns'
 
 import { PrismaService } from '@/prisma/prisma.service'
-import { Passkey, PasskeySchema, SessionUser } from '@/shared/schemas'
 
 @Injectable()
 export class AuthService {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint . ",
+    "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "preview": "vite preview",
     "postinstall": "chakra typegen ./src/theme/index.ts"
@@ -16,6 +16,7 @@
     "@emotion/react": "^11.14.0",
     "@orpc/openapi-client": "^1.15.0",
     "@orpc/tanstack-query": "^1.15.0",
+    "@repo/api-contract": "*",
     "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-query": "^5.99.0",
     "@vitejs/plugin-react": "^6.0.1",

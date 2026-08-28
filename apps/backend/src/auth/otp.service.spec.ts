@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { OtpService } from './otp/otp.service'
+import { OtpService } from './otp.service'
 
 describe('OtpService', () => {
   let service: OtpService

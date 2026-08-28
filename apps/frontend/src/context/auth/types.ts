@@ -1,4 +1,4 @@
-import type { SessionUser } from '~shared/schemas'
+import type { SessionUser } from '@repo/api-contract/schemas'
 
 export interface AuthContextProps {
   user: SessionUser

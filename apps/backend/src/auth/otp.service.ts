@@ -1,10 +1,4 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import crypto from 'crypto'
-import { addSeconds, isAfter } from 'date-fns'
-
-import { AppCacheService } from '@/app_cache/app_cache.service'
-import { env } from '@/env/schema'
-import { MailService } from '@/mail/mail.service'
 import {
   EmailLoginInputs,
   OtpResponse,
@@ -12,7 +6,13 @@ import {
   OtpVerifyInputs,
   SessionUser,
   SessionUserSchema,
-} from '@/shared/schemas'
+} from '@repo/api-contract/schemas'
+import crypto from 'crypto'
+import { addSeconds, isAfter } from 'date-fns'
+
+import { AppCacheService } from '@/app_cache/app_cache.service'
+import { env } from '@/env/schema'
+import { MailService } from '@/mail/mail.service'
 import { UserService } from '@/user/user.service'
 
 import { OtpSchema } from './auth.schema'

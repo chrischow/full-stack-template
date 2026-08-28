@@ -1,0 +1,29 @@
+{
+  "name": "@repo/api-contract",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/contracts/index.js",
+  "types": "./dist/contracts/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js",
+      "require": "./dist/contracts/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "import": "./dist/schemas/index.js",
+      "require": "./dist/schemas/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

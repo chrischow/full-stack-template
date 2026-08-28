@@ -1,10 +1,10 @@
 import { Controller, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { Implement, implement } from '@orpc/nest'
+import { contract } from '@repo/api-contract'
+import { SessionUserSchema } from '@repo/api-contract/schemas'
 
 import { env } from '@/env/schema'
-import { contract } from '@/shared/contracts'
-import { SessionUserSchema } from '@/shared/schemas'
 
 import { AuthService } from './auth.service'
 import { OtpService } from './otp.service'

@@ -1,5 +1,6 @@
 import { Button, Card, Center, Field, Heading, Input, PinInput, Stack, Text } from '@chakra-ui/react'
 import { ORPCError } from '@orpc/client'
+import { EmailLoginInputsSchema, OtpResponseSchema } from '@repo/api-contract/schemas'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -7,7 +8,6 @@ import { useNavigate } from 'react-router'
 import { orpc } from '@/app/orpc-client'
 import { toaster } from '@/components/ui/toaster'
 import { useAuthContext } from '@/context/auth'
-import { EmailLoginInputsSchema, OtpResponseSchema } from '~shared/schemas'
 
 const OtpPage = () => {
   const navigate = useNavigate()

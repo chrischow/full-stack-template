@@ -13,6 +13,7 @@
       "inputs": ["src/**/*.ts", "tsconfig*.json", "vite.config.*", "eslint.config.mjs"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }

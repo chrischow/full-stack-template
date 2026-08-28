@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { EmailLoginInputs, Uuid } from '@repo/api-contract/schemas'
 
 import { PrismaService } from '@/prisma/prisma.service'
-import { EmailLoginInputs, Uuid } from '@/shared/schemas'
 
 import { UpdateUserInputs, User } from './user.schema'
 

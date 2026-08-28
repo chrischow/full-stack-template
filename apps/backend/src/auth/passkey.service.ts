@@ -7,6 +7,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import {
+  PasskeyAuthenticationInputs,
+  PasskeyAuthenticationOptionsSchema,
+  PasskeyRegistrationInputs,
+  PasskeyRegistrationOptions,
+  PasskeyRegistrationOptionsSchema,
+  SessionUser,
+  SessionUserSchema,
+  TransportSchema,
+} from '@repo/api-contract/schemas'
+import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
   verifyAuthenticationResponse,
@@ -18,16 +28,6 @@ import z from 'zod'
 import { AppCacheService } from '@/app_cache/app_cache.service'
 import { env } from '@/env/schema'
 import { PrismaService } from '@/prisma/prisma.service'
-import {
-  PasskeyAuthenticationInputs,
-  PasskeyAuthenticationOptionsSchema,
-  PasskeyRegistrationInputs,
-  PasskeyRegistrationOptions,
-  PasskeyRegistrationOptionsSchema,
-  SessionUser,
-  SessionUserSchema,
-  TransportSchema,
-} from '@/shared/schemas'
 import { UserService } from '@/user/user.service'
 
 @Injectable()

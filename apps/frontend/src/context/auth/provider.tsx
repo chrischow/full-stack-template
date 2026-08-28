@@ -1,9 +1,9 @@
+import type { SessionUser } from '@repo/api-contract/schemas'
 import { type ReactNode, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { useLocalStorage } from 'usehooks-ts'
 
 import { useAuth } from '@/hooks'
-import type { SessionUser } from '~shared/schemas'
 
 import { AuthContext } from './context'
 

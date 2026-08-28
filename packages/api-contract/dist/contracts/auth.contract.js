@@ -1,6 +1,5 @@
 import { oc } from '@orpc/contract'
 import z from 'zod'
-
 import {
   EmailLoginInputsSchema,
   OtpResponseSchema,
@@ -11,10 +10,8 @@ import {
   PasskeyRegistrationOptionsSchema,
   PasskeySchema,
   SessionUserSchema,
-} from '../schemas'
-
+} from '../schemas/index.js'
 const tags = ['Auth']
-
 export const authContract = {
   status: oc
     .route({
