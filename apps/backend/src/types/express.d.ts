@@ -1,6 +1,5 @@
+import { SessionUser } from '@repo/api-contract/schemas'
 import type { Session, SessionData } from 'express-session'
-
-import { SessionUser } from '@/shared/schemas'
 
 declare module 'express' {
   export interface Request {
