@@ -1,0 +1,1 @@
+When contributing features, decide on the appropriate guidelines in `docs/index.md`, and read the **minimum** number of guidelines required to perform the required tasks.

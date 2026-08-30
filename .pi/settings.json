@@ -1,0 +1,54 @@
+{
+  "packages": [
+    "npm:@chrischow/pi-lockdown",
+    "npm:@plannotator/pi-extension"
+  ],
+  "lockdown": {
+    "customTools": {
+      "run_npm_script": "warn"
+    },
+    "tools": [
+      "read",
+      "edit",
+      "write",
+      "grep",
+      "find",
+      "ls"
+    ],
+    "protectedPatterns": [
+      "**/.env*",
+      "**/.git/**",
+      "**/node_modules/**"
+    ],
+    "fileAccess": {
+      "external": {
+        "protected": {
+          "read": "block",
+          "write": "block",
+          "edit": "block",
+          "other": "block"
+        },
+        "unprotected": {
+          "read": "warn",
+          "write": "block",
+          "edit": "block",
+          "other": "block"
+        }
+      },
+      "internal": {
+        "protected": {
+          "read": "warn",
+          "write": "warn",
+          "edit": "warn",
+          "other": "warn"
+        },
+        "unprotected": {
+          "read": "allow",
+          "write": "warn",
+          "edit": "warn",
+          "other": "warn"
+        }
+      }
+    }
+  }
+}
