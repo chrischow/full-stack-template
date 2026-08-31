@@ -5,7 +5,8 @@
   ],
   "lockdown": {
     "customTools": {
-      "run_npm_script": "warn"
+      "run_npm_script": "warn",
+      "git_staged_changes": "warn"
     },
     "tools": [
       "read",
