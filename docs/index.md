@@ -11,6 +11,7 @@ This document serves as an index for guidelines on contributing features. It is 
 
 ## App: Frontend
 
+- [Creating components](./frontend/creating-components.md)
 - [Consuming an API endpoint](./frontend/consuming-an-api-endpoint.md)
 
 ## (WIP) Infra
