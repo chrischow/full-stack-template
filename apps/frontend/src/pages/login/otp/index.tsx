@@ -1,12 +1,17 @@
-import { Button, Card, Center, Field, Heading, Input, PinInput, Stack, Text } from '@chakra-ui/react'
 import { ORPCError } from '@orpc/client'
 import { EmailLoginInputsSchema, OtpResponseSchema } from '@repo/api-contract/schemas'
 import { useMutation } from '@tanstack/react-query'
+import { REGEXP_ONLY_DIGITS } from 'input-otp'
+import { Loader } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { orpc } from '@/app/orpc-client'
-import { toaster } from '@/components/ui/toaster'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { toast } from '@/components/ui/toast'
 import { useAuthContext } from '@/context/auth'
 
 const OtpPage = () => {
@@ -15,7 +20,7 @@ const OtpPage = () => {
 
   const [isOtpRequested, setIsOtpRequested] = useState(false)
   const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', ''])
+  const [otp, setOtp] = useState<string>('')
   const [canRequestAfter, setCanRequestAfter] = useState<Date>()
 
   const { mutateAsync: requestOtp, isPending: isOtpRequestPending } = useMutation(
@@ -23,9 +28,8 @@ const OtpPage = () => {
       onSuccess: (response) => {
         const { success, data } = OtpResponseSchema.safeParse(response)
         if (!success) {
-          toaster.create({
-            description: <Text color="fg.error">Failed to generate OTP.</Text>,
-            duration: 3000,
+          toast.add({
+            description: <p className="red.500">Failed to generate OTP.</p>,
           })
           return
         }
@@ -38,9 +42,8 @@ const OtpPage = () => {
   const { mutateAsync: verifyOtp, isPending: isOtpVerifyPending } = useMutation(
     orpc.auth.otp.verify.mutationOptions({
       onSuccess: (user) => {
-        toaster.create({
-          description: <Text color="fg.success">Logged in successfully.</Text>,
-          duration: 3000,
+        toast.add({
+          description: <p className="green.500">Logged in successfully.</p>,
         })
 
         login(user)
@@ -48,17 +51,15 @@ const OtpPage = () => {
         navigate('/')
       },
       onError: (error) => {
-        setOtp(['', '', '', '', '', ''])
+        setOtp('')
         if (error instanceof ORPCError) {
-          toaster.create({
-            description: <Text color="fg.error">{error.data.body.message}</Text>,
-            duration: 3000,
+          toast.add({
+            description: <p color="red.500">{error.data.body.message}</p>,
           })
           return
         }
-        toaster.create({
-          description: <Text color="fg.error">Failed to validate OTP. Please try again.</Text>,
-          duration: 3000,
+        toast.add({
+          description: <p color="red.500">Failed to validate OTP. Please try again.</p>,
         })
       },
     }),
@@ -67,113 +68,105 @@ const OtpPage = () => {
   const handleRequestOtp = async () => {
     const { success } = EmailLoginInputsSchema.safeParse({ email })
     if (!success) {
-      toaster.create({
-        description: <Text color="fg.error">Please input a valid email.</Text>,
-        duration: 3000,
+      toast.add({
+        description: <p color="red.500">Please input a valid email.</p>,
       })
       return
     }
-    setOtp(['', '', '', '', '', ''])
+    setOtp('')
     await requestOtp({ email })
   }
 
   const handleVerifyOtp = async () => {
-    const fullOtp = otp.join('')
-    if (fullOtp.length !== 6) {
-      toaster.create({
-        description: <Text color="fg.error">Invalid OTP.</Text>,
-        duration: 3000,
+    if (otp.length !== 6) {
+      toast.add({
+        description: <p color="red.500">Invalid OTP.</p>,
       })
     }
-    await verifyOtp({ email, otp: fullOtp })
+    await verifyOtp({ email, otp })
   }
 
   const canRequestOtp = canRequestAfter ? new Date().getTime() >= canRequestAfter.getTime() : false
-  const fullOtp = otp.join('')
-  const isOtpValid = fullOtp.length === 6
+  const isOtpValid = otp.length === 6
 
   return (
-    <Center w="100vw" h="100vh">
-      <Card.Root colorPalette="indigo" variant="outline">
-        <Card.Body>
-          <Stack align="center" gap={6}>
-            <Heading size="3xl">Full Stack Template</Heading>
-            <Stack w="100%" gap={4}>
-              {!isOtpRequested && (
-                <>
-                  <Input
-                    value={email}
-                    onChange={(e) => setEmail(e.currentTarget.value)}
-                    placeholder="Enter your email"
-                    autoFocus={true}
-                    onKeyDown={(e) => {
-                      if (e.code === 'Enter') {
-                        handleRequestOtp()
-                      }
-                    }}
-                  />
-                  <Button w="full" colorPalette={'brand'} loading={isOtpRequestPending} onClick={handleRequestOtp}>
-                    Request OTP
-                  </Button>
-                </>
-              )}
-              {isOtpRequested && (
-                <>
-                  <Field.Root gap={3}>
-                    <Field.Label>Enter your OTP:</Field.Label>
-                    <PinInput.Root otp value={otp} onValueChange={(e) => setOtp(e.value)} autoFocus={true}>
-                      <PinInput.HiddenInput />
-                      <PinInput.Control>
-                        <PinInput.Input index={0} />
-                        <PinInput.Input index={1} />
-                        <PinInput.Input index={2} />
-                        <PinInput.Input index={3} />
-                        <PinInput.Input index={4} />
-                        <PinInput.Input index={5} />
-                      </PinInput.Control>
-                    </PinInput.Root>
-                  </Field.Root>
-                  <Stack w="100%">
-                    <Button
-                      colorPalette="brand"
-                      loading={isOtpVerifyPending}
-                      disabled={!isOtpValid}
-                      onClick={handleVerifyOtp}
-                    >
-                      Submit
-                    </Button>
-                    <Button
-                      w="100%"
-                      colorPalette="gray"
-                      variant="subtle"
-                      disabled={!canRequestOtp}
-                      loading={isOtpRequestPending}
-                      onClick={() => {
-                        if (canRequestOtp) {
-                          handleRequestOtp()
-                          toaster.create({
-                            description: <Text color="fg.success">Requested a new OTP.</Text>,
-                            duration: 3000,
-                          })
-                          return
-                        } else {
-                          toaster.create({
-                            description: <Text color="fg.error">Cannot request OTP yet.</Text>,
-                            duration: 3000,
-                          })
-                        }
-                      }}
-                    >
-                      Re-request OTP
-                    </Button>
-                  </Stack>
-                </>
-              )}
-            </Stack>
-          </Stack>
-        </Card.Body>
-      </Card.Root>
-    </Center>
+    <div className="w-dvw h-dvh flex flex-col justify-center content-center">
+      <Card className="w-md self-center">
+        <CardHeader>
+          <CardTitle className="text-center text-3xl font-bold">Full Stack Template</CardTitle>
+        </CardHeader>
+        <CardContent className="justify-center">
+          {!isOtpRequested && (
+            <>
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.currentTarget.value)}
+                placeholder="Enter your email"
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.code === 'Enter') {
+                    handleRequestOtp()
+                  }
+                }}
+              />
+              <Button className="w-full" disabled={isOtpRequestPending} onClick={handleRequestOtp}>
+                {isOtpRequestPending && <Loader />}
+                {!isOtpRequestPending && 'Request OTP'}
+              </Button>
+            </>
+          )}
+          {isOtpRequested && (
+            <>
+              <div className="flex flex-row self-center">
+                <InputOTP
+                  maxLength={6}
+                  required
+                  pattern={REGEXP_ONLY_DIGITS}
+                  value={otp}
+                  onChange={(e) => setOtp(e)}
+                  autoFocus={true}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <div className="w-full flex flex-col gap-2">
+                <Button disabled={isOtpVerifyPending || !isOtpValid} onClick={handleVerifyOtp}>
+                  {isOtpVerifyPending && <Loader />}
+                  {!isOtpVerifyPending && 'Submit'}
+                </Button>
+                <Button
+                  className="w-full"
+                  disabled={isOtpRequestPending || !canRequestOtp}
+                  onClick={() => {
+                    if (canRequestOtp) {
+                      handleRequestOtp()
+                      toast.add({
+                        description: <p color="green.500">Requested a new OTP.</p>,
+                      })
+                      return
+                    } else {
+                      toast.add({
+                        description: <p color="red.500">Cannot request OTP yet.</p>,
+                      })
+                    }
+                  }}
+                >
+                  {isOtpRequestPending && <Loader />}
+                  {!isOtpRequestPending && 'Re-request OTP'}
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

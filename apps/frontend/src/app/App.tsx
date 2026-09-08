@@ -1,11 +1,8 @@
-import './App.css'
-
 import { BrowserRouter, Route, Routes } from 'react-router'
 
-import { Provider } from '@/components/ui/provider'
-import { Toaster } from '@/components/ui/toaster'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import WithProviders from '@/components/WithProviders'
-import WithTopAndSideLayout from '@/components/WithTopAndSideLayout'
+import WithSidebarLayout from '@/components/WithSidebarLayout'
 import AccountSettingsPage from '@/pages/account'
 import HomePage from '@/pages/home'
 import LoginPage from '@/pages/login'
@@ -14,11 +11,11 @@ import LoginRedirectPage from '@/pages/login/redirect'
 
 function App() {
   return (
-    <Provider>
+    <TooltipProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<WithProviders />}>
-            <Route element={<WithTopAndSideLayout />}>
+            <Route element={<WithSidebarLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/account" element={<AccountSettingsPage />} />
             </Route>
@@ -28,8 +25,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-      <Toaster />
-    </Provider>
+    </TooltipProvider>
   )
 }
 

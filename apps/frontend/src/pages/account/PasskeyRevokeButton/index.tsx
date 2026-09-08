@@ -1,8 +1,19 @@
-import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Loader } from 'lucide-react'
 
 import { orpc } from '@/app/orpc-client'
-import { toaster } from '@/components/ui/toaster'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/toast'
 
 const PasskeyRevokeButton = ({ passkeyId }: { passkeyId: string }) => {
   const queryClient = useQueryClient()
@@ -10,9 +21,8 @@ const PasskeyRevokeButton = ({ passkeyId }: { passkeyId: string }) => {
   const { mutate: revokePasskey, isPending: isPasskeyRevokePending } = useMutation(
     orpc.auth.passkeys.revoke.mutationOptions({
       onSuccess: async () => {
-        toaster.create({
-          description: <Text color="fg.success">Revoked passkey.</Text>,
-          duration: 3000,
+        toast.add({
+          description: <p color="red.500">Revoked passkey.</p>,
         })
 
         await queryClient.invalidateQueries({ queryKey: orpc.auth.passkeys.list.queryKey() })
@@ -21,44 +31,38 @@ const PasskeyRevokeButton = ({ passkeyId }: { passkeyId: string }) => {
   )
 
   return (
-    <Dialog.Root>
-      <Dialog.Trigger asChild>
-        <Button size="2xs" variant="surface" colorPalette="red" loading={isPasskeyRevokePending}>
-          Revoke
-        </Button>
-      </Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>Revoke Passkey</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              <Text>
-                Are you sure you want to revoke this passkey on the app? The passkey on your device will no longer work,
-                and you may safely delete it after this.
-              </Text>
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Dialog.ActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
-              </Dialog.ActionTrigger>
-              <Button
-                colorPalette="critical"
-                loading={isPasskeyRevokePending}
-                onClick={() => revokePasskey({ passkeyId })}
-              >
-                Revoke
+    <AlertDialog>
+      <AlertDialogTrigger
+        render={
+          <Button size="xs" variant="destructive" disabled={isPasskeyRevokePending}>
+            {isPasskeyRevokePending && <Loader />}
+            {!isPasskeyRevokePending && 'Revoke'}
+          </Button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revoke Passkey</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to revoke this passkey on the app? The passkey on your device will no longer work, and
+            you may safely delete it after this.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            render={
+              <Button type="button" variant="ghost">
+                Close
               </Button>
-            </Dialog.Footer>
-            <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
-            </Dialog.CloseTrigger>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+            }
+          />
+          <Button variant="destructive" disabled={isPasskeyRevokePending} onClick={() => revokePasskey({ passkeyId })}>
+            {isPasskeyRevokePending && <Loader />}
+            {!isPasskeyRevokePending && 'Revoke'}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

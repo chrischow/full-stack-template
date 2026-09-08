@@ -1,12 +1,13 @@
-import { Button, Text } from '@chakra-ui/react'
 import { ORPCError } from '@orpc/client'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useMutation } from '@tanstack/react-query'
+import { Loader } from 'lucide-react'
 import { IoMdFingerPrint } from 'react-icons/io'
 import { useNavigate } from 'react-router'
 
 import { orpc } from '@/app/orpc-client'
-import { toaster } from '@/components/ui/toaster'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/toast'
 import { useAuthContext } from '@/context/auth'
 
 const PasskeyLoginButton = () => {
@@ -22,15 +23,13 @@ const PasskeyLoginButton = () => {
       },
       onError: (error) => {
         if (error instanceof ORPCError) {
-          toaster.create({
-            description: <Text color="fg.error">{error.data.body.message}</Text>,
-            duration: 3000,
+          toast.add({
+            description: <p className="red.500">{error.data.body.message}</p>,
           })
           return
         }
-        toaster.create({
-          description: <Text color="fg.error">Failed to log in with Passkey. Please try again.</Text>,
-          duration: 3000,
+        toast.add({
+          description: <p className="text-red-500">Failed to log in with Passkey. Please try again.</p>,
         })
       },
     }),
@@ -51,8 +50,13 @@ const PasskeyLoginButton = () => {
   const isPending = isLoginVerificationPending || isLoginPending
 
   return (
-    <Button w="full" colorPalette={'brand'} loading={isPending} onClick={handlePasskeyLogin}>
-      <IoMdFingerPrint /> Login with Passkey
+    <Button className="w-full" onClick={handlePasskeyLogin}>
+      {isPending && <Loader />}
+      {!isPending && (
+        <>
+          <IoMdFingerPrint /> Login with Passkey
+        </>
+      )}
     </Button>
   )
 }

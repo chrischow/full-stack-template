@@ -8,7 +8,7 @@
       "run_npm_script": "warn",
       "git_staged_changes": "warn"
     },
-    "tools": [
+    "defaultTools": [
       "read",
       "edit",
       "write",

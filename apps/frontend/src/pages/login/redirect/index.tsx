@@ -1,4 +1,4 @@
-import { Center, HStack, Spinner, Text } from '@chakra-ui/react'
+import { Loader } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -22,12 +22,11 @@ const LoginRedirectPage = () => {
   }, [getUser, login, navigate])
 
   return (
-    <Center w="100vw" h="100vh">
-      <HStack gap={2}>
-        <Spinner />
-        <Text>Loading</Text>
-      </HStack>
-    </Center>
+    <div className="w-dvw h-dvh flex flex-row justify-center content-center">
+      <div className="flex flew-row">
+        <Loader /> Loading
+      </div>
+    </div>
   )
 }
 

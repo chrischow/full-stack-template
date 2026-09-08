@@ -1,12 +1,13 @@
-import { Button, Center, Heading, HStack, Spacer, Stack, Text } from '@chakra-ui/react'
 import { ORPCError } from '@orpc/client'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Loader } from 'lucide-react'
 import { BiPlus } from 'react-icons/bi'
 import { IoMdFingerPrint } from 'react-icons/io'
 
 import { orpc } from '@/app/orpc-client'
-import { toaster } from '@/components/ui/toaster'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/toast'
 import { useAuthContext } from '@/context/auth'
 
 import PasskeyRevokeButton from './PasskeyRevokeButton'
@@ -26,15 +27,13 @@ const AccountSettingsPage = () => {
       },
       onError: (error) => {
         if (error instanceof ORPCError) {
-          toaster.create({
-            description: <Text color="fg.error">{error.data.body.message}</Text>,
-            duration: 3000,
+          toast.add({
+            description: <p color="red.500">{error.data.body.message}</p>,
           })
           return
         }
-        toaster.create({
-          description: <Text color="fg.error">Could not register passkey. Please try again.</Text>,
-          duration: 3000,
+        toast.add({
+          description: <p color="red.500">Could not register passkey. Please try again.</p>,
         })
       },
     }),
@@ -43,47 +42,43 @@ const AccountSettingsPage = () => {
   const { data: passkeys, isPending: isPasskeysPending } = useQuery(orpc.auth.passkeys.list.queryOptions())
 
   return (
-    <Stack px={6} py={4} gap={6} w="100%">
-      <Heading size="3xl">Account</Heading>
-      <Stack gap={4}>
-        <HStack w="100%" align="center" gap={4}>
-          <Heading size="xl">
-            <HStack gap={1}>
-              <IoMdFingerPrint /> Passkeys
-            </HStack>
-          </Heading>
+    <div className="flex flex-col w-full px-6 py-4 gap-6">
+      <div className="flex flex-col w-full gap-4">
+        <h1 className="text-3xl font-bold">Account</h1>
+        <div className="flex flex-row gap-4">
+          <div className="flex flex-row gap-2 text-2xl content-center">
+            <IoMdFingerPrint />
+            <h2 className="text-2xl font-semibold">Passkeys</h2>
+          </div>
           <Button
-            size="2xs"
-            variant="surface"
+            className="text-xs"
             onClick={() => registerPasskey({ email: user.email })}
-            loading={isPasskeyRegistrationPending}
+            disabled={isPasskeyRegistrationPending}
           >
-            <BiPlus /> Add
+            {isPasskeyRegistrationPending && <Loader />}
+            {!isPasskeyRegistrationPending && (
+              <>
+                <BiPlus /> Add
+              </>
+            )}
           </Button>
-        </HStack>
+        </div>
         {!isPasskeysPending && (!passkeys || passkeys.length === 0) && (
-          <Center>
-            <Text fontSize="sm" color="fg.subtle">
-              No passkeys created.
-            </Text>
-          </Center>
+          <div className="flex flex-col w-full text-center">
+            <p className="font-sm text-gray-400">No passkeys created.</p>
+          </div>
         )}
-        <Stack gap={2} w="100%">
-          {passkeys &&
-            passkeys.map((pk) => {
-              return (
-                <HStack key={pk.id} px={3} py={2} rounded="md" w="100%" borderWidth="1px">
-                  <Text fontSize="sm" color="fg.muted">
-                    {pk.name}
-                  </Text>
-                  <Spacer />
-                  <PasskeyRevokeButton passkeyId={pk.id} />
-                </HStack>
-              )
-            })}
-        </Stack>
-      </Stack>
-    </Stack>
+        {passkeys &&
+          passkeys.map((pk) => {
+            return (
+              <div key={pk.id} className="flex flex-row px-3 py-2 rounded-md w-full border justify-between">
+                <p className="text-sm gray-400">{pk.name}</p>
+                <PasskeyRevokeButton passkeyId={pk.id} />
+              </div>
+            )
+          })}
+      </div>
+    </div>
   )
 }
 

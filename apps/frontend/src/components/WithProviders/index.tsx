@@ -4,7 +4,7 @@ import { Outlet } from 'react-router'
 
 import { AuthProvider } from '@/context/auth'
 
-import { toaster } from '../ui/toaster'
+import { toast } from '../ui/toast'
 
 const WithProviders = () => {
   const toastId = 'error-toast'
@@ -18,7 +18,7 @@ const WithProviders = () => {
       },
       queryCache: new QueryCache({
         onError: (error) => {
-          toaster.create({
+          toast.add({
             id: toastId,
             description: error.message,
             type: 'error',
