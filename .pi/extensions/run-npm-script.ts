@@ -2,7 +2,19 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { execSync } from "node:child_process";
 
-const VALID_SCRIPTS = ["build", "lint", "lint:fix", "check-types", "format", "test"] as const;
+const VALID_SCRIPTS = [
+  "build",
+  "lint",
+  "lint:fix",
+  "check-types",
+  "format",
+  "test",
+  "db:reset",
+  "db:sync",
+  "db:seed:run",
+  "db:migration:run",
+  "db:generate",
+] as const;
 type ScriptName = (typeof VALID_SCRIPTS)[number];
 
 export default function (pi: ExtensionAPI) {

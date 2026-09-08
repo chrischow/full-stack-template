@@ -23,6 +23,7 @@
     "db:sync": "dotenv -e .env.development prisma db push && prisma generate",
     "db:migration:gen": "dotenv -e .env.development prisma migrate dev --name $npm_config_name",
     "db:migration:run": "dotenv -e .env.development prisma migrate dev",
+    "db:generate": "prisma generate",
     "db:reset": "dotenv -e .env.development prisma migrate reset",
     "db:seed:run": "dotenv -e .env.development prisma db seed",
     "db:studio": "dotenv -e .env.development prisma studio"

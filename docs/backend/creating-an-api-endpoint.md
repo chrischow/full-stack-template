@@ -1,13 +1,13 @@
 # Guidelines for Creating an API Endpoint
 
 ## 1. Set Up the Schema
-Decide on the response shape. This must be a Zod schema. Look in `backend/src/shared/schemas`:
+Decide on the response shape. This must be a Zod schema. Look in `packages/api-contract/src/schemas`:
 
 - If the schema already exists and is fit for purpose, use that in the subsequent steps.
 - Else if only small modifications are required to an existing schema S, modify S, and make the necessary changes in the endpoints that use S.
 - Otherwise, you will need to create a new schema:
   - If the schema you intend to create naturally belongs to an existing schema file, create the schema in that file.
-  - Otherwise, create a new schema file, and add the barrel export to `backend/src/shared/schemas/index.ts`. The new schema is to be created in that new schema file.
+  - Otherwise, create a new schema file, and add the barrel export to `packages/api-contract/src/schemas/index.ts`. The new schema is to be created in that new schema file.
 
 When creating schemas:
 
@@ -30,7 +30,7 @@ export type UserPostsList = z.infer<typeof UserPostsListSchema>
 Create a route under a contract:
 
 - If the route you intend to create naturally belongs to an existing contract file, add the route to the contract in that file.
-- Otherwise, create a new contract file, set up an array of tags, and add the barrel export to `backend/src/shared/contracts/index.ts`.
+- Otherwise, create a new contract file, set up an array of tags, and add the barrel export to `packages/api-contract/src//contracts/index.ts`.
 
 When adding a new key to the contract:
 
