@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 
+import { Toaster } from '@/components/ui/toast'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import WithProviders from '@/components/WithProviders'
 import WithSidebarLayout from '@/components/WithSidebarLayout'
@@ -25,6 +26,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </TooltipProvider>
   )
 }

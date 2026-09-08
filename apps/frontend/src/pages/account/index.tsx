@@ -24,16 +24,22 @@ const AccountSettingsPage = () => {
         const credentials = await startRegistration({ optionsJSON: options })
         await verifyRegistration(credentials)
         await queryClient.invalidateQueries({ queryKey: orpc.auth.passkeys.list.queryKey() })
+        toast.add({
+          description: 'Successfully added passkey.',
+          type: 'success',
+        })
       },
       onError: (error) => {
         if (error instanceof ORPCError) {
           toast.add({
-            description: <p color="red.500">{error.data.body.message}</p>,
+            description: error.data.body.message,
+            type: 'error',
           })
           return
         }
         toast.add({
-          description: <p color="red.500">Could not register passkey. Please try again.</p>,
+          description: 'Could not register passkey. Please try again.',
+          type: 'error',
         })
       },
     }),
@@ -51,7 +57,7 @@ const AccountSettingsPage = () => {
             <h2 className="text-2xl font-semibold">Passkeys</h2>
           </div>
           <Button
-            className="text-xs"
+            size="sm"
             onClick={() => registerPasskey({ email: user.email })}
             disabled={isPasskeyRegistrationPending}
           >
@@ -65,14 +71,14 @@ const AccountSettingsPage = () => {
         </div>
         {!isPasskeysPending && (!passkeys || passkeys.length === 0) && (
           <div className="flex flex-col w-full text-center">
-            <p className="font-sm text-gray-400">No passkeys created.</p>
+            <p className="font-sm text-muted-foreground">No passkeys created.</p>
           </div>
         )}
         {passkeys &&
           passkeys.map((pk) => {
             return (
               <div key={pk.id} className="flex flex-row px-3 py-2 rounded-md w-full border justify-between">
-                <p className="text-sm gray-400">{pk.name}</p>
+                <p className="text-sm text-secondary-foreground">{pk.name}</p>
                 <PasskeyRevokeButton passkeyId={pk.id} />
               </div>
             )

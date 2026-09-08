@@ -24,12 +24,14 @@ const PasskeyLoginButton = () => {
       onError: (error) => {
         if (error instanceof ORPCError) {
           toast.add({
-            description: <p className="red.500">{error.data.body.message}</p>,
+            description: error.data.body.message,
+            type: 'error',
           })
           return
         }
         toast.add({
-          description: <p className="text-red-500">Failed to log in with Passkey. Please try again.</p>,
+          description: 'Failed to log in with Passkey. Please try again.',
+          type: 'error',
         })
       },
     }),

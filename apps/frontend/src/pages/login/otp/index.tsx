@@ -29,12 +29,23 @@ const OtpPage = () => {
         const { success, data } = OtpResponseSchema.safeParse(response)
         if (!success) {
           toast.add({
-            description: <p className="red.500">Failed to generate OTP.</p>,
+            description: 'Failed to generate OTP.',
+            type: 'error',
           })
           return
         }
         setCanRequestAfter(data.canRequestAfter)
         setIsOtpRequested(true)
+      },
+      onError: (error) => {
+        let description = 'Could not request OTP.'
+        if (error instanceof ORPCError) {
+          description = error.data.body.message
+        }
+        toast.add({
+          description,
+          type: 'error',
+        })
       },
     }),
   )
@@ -43,7 +54,8 @@ const OtpPage = () => {
     orpc.auth.otp.verify.mutationOptions({
       onSuccess: (user) => {
         toast.add({
-          description: <p className="green.500">Logged in successfully.</p>,
+          description: 'Logged in successfully.',
+          type: 'success',
         })
 
         login(user)
@@ -54,12 +66,14 @@ const OtpPage = () => {
         setOtp('')
         if (error instanceof ORPCError) {
           toast.add({
-            description: <p color="red.500">{error.data.body.message}</p>,
+            description: error.data.body.message,
+            type: 'error',
           })
           return
         }
         toast.add({
-          description: <p color="red.500">Failed to validate OTP. Please try again.</p>,
+          description: 'Failed to validate OTP. Please try again.',
+          type: 'error',
         })
       },
     }),
@@ -69,7 +83,8 @@ const OtpPage = () => {
     const { success } = EmailLoginInputsSchema.safeParse({ email })
     if (!success) {
       toast.add({
-        description: <p color="red.500">Please input a valid email.</p>,
+        description: 'Please input a valid email.',
+        type: 'error',
       })
       return
     }
@@ -80,7 +95,8 @@ const OtpPage = () => {
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
       toast.add({
-        description: <p color="red.500">Invalid OTP.</p>,
+        description: 'Invalid OTP.',
+        type: 'error',
       })
     }
     await verifyOtp({ email, otp })
@@ -148,12 +164,14 @@ const OtpPage = () => {
                     if (canRequestOtp) {
                       handleRequestOtp()
                       toast.add({
-                        description: <p color="green.500">Requested a new OTP.</p>,
+                        description: 'Requested a new OTP.',
+                        type: 'success',
                       })
                       return
                     } else {
                       toast.add({
-                        description: <p color="red.500">Cannot request OTP yet.</p>,
+                        description: 'Cannot request OTP yet.',
+                        type: 'error',
                       })
                     }
                   }}

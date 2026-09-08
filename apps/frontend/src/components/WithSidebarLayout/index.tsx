@@ -61,8 +61,8 @@ const WithSidebarLayout = () => {
                   navigate('/login')
                 }}
               >
-                <BiLogOut className="text-red-500" />
-                <span className="text-red-500">Logout</span>
+                <BiLogOut className="text-destructive" />
+                <span className="text-destructive">Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarFooter>

@@ -22,7 +22,8 @@ const PasskeyRevokeButton = ({ passkeyId }: { passkeyId: string }) => {
     orpc.auth.passkeys.revoke.mutationOptions({
       onSuccess: async () => {
         toast.add({
-          description: <p color="red.500">Revoked passkey.</p>,
+          description: 'Revoked passkey.',
+          type: 'success',
         })
 
         await queryClient.invalidateQueries({ queryKey: orpc.auth.passkeys.list.queryKey() })
