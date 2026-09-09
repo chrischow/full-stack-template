@@ -6,7 +6,10 @@
   "lockdown": {
     "customTools": {
       "run_npm_script": "warn",
-      "git_staged_changes": "warn"
+      "git_staged_changes": "warn",
+      "shadcn_search": "warn",
+      "shadcn_docs": "warn",
+      "fetch_url": "warn"
     },
     "defaultTools": [
       "read",
