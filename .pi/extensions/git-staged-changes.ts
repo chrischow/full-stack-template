@@ -34,7 +34,7 @@ export default function (pi: ExtensionAPI) {
 
       const { code: statusCode, stdout: statusOutput, stderr: statusError } = await pi.exec(
         "git",
-        ["diff", "--cached", "--stat"],
+        ["diff", "--cached"],
         { signal: ctx.signal }
       );
 
