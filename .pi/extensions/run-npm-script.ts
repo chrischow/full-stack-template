@@ -9,11 +9,11 @@ const VALID_SCRIPTS = [
   "check-types",
   "format",
   "test",
-  "db:reset",
-  "db:sync",
-  "db:seed:run",
-  "db:migration:run",
-  "db:generate",
+  "db:reset -w apps/backend",
+  "db:sync -w apps/backend",
+  "db:seed:run -w apps/backend",
+  "db:migration:run -w apps/backend",
+  "db:generate -w apps/backend",
 ] as const;
 type ScriptName = (typeof VALID_SCRIPTS)[number];
 
@@ -21,7 +21,7 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool({
     name: "run_npm_script",
     label: "Run NPM Script",
-    description: `Use this tool to build, lint, check types, format or test code in this repo by running one of the following npm scripts in the project root: ${VALID_SCRIPTS.join(", ")}.`,
+    description: `Use this tool to build, lint, check types, format, test code, and run DB commands in this repo by running one of the following npm scripts in the project root: ${VALID_SCRIPTS.join(", ")}.`,
     parameters: Type.Object({
       script: Type.String({
         description: `The npm script to run. Must be one of: ${VALID_SCRIPTS.join(", ")}`,
