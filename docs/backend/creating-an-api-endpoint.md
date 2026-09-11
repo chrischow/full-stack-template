@@ -30,7 +30,7 @@ export type UserPostsList = z.infer<typeof UserPostsListSchema>
 Create a route under a contract:
 
 - If the route you intend to create naturally belongs to an existing contract file, add the route to the contract in that file.
-- Otherwise, create a new contract file, set up an array of tags, and add the barrel export to `packages/api-contract/src//contracts/index.ts`.
+- Otherwise, create a new contract file, set up an array of tags, and add the barrel export to `packages/api-contract/src/contracts/index.ts`.
 
 When adding a new key to the contract:
 
