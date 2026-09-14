@@ -1,0 +1,28 @@
+{
+  "name": "@repo/db",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "dotenv -e .env.development npm run db:generate && tsc",
+    "dev": "tsc --watch",
+    "db:sync": "dotenv -e .env.development prisma db push && dotenv -e .env.development prisma generate",
+    "db:migration:gen": "dotenv -e .env.development prisma migrate dev --name $npm_config_name",
+    "db:migration:run": "dotenv -e .env.development prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:reset": "dotenv -e .env.development prisma migrate reset",
+    "db:seed:run": "dotenv -e .env.development prisma db seed",
+    "db:studio": "dotenv -e .env.development prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "dotenv-cli": "^11.0.0"
+  }
+}

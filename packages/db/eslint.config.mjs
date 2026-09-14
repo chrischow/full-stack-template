@@ -6,6 +6,13 @@ import globals from 'globals'
 export default defineConfig([
   ...baseConfig,
   {
+    ignores: [
+      "index.js",
+      "index.d.ts",
+      "prisma/migrations/**/*",
+    ],
+  },
+  {
     files: ["**/*.ts"],
     languageOptions: {
       globals: {

@@ -34,6 +34,10 @@ COPY --from=installer /usr/src/app/apps/backend/node_modules ./apps/backend/node
 COPY --from=builder /usr/src/app/packages/api-contract/dist ./packages/api-contract/dist
 COPY --from=builder /usr/src/app/packages/api-contract/package.json ./packages/api-contract/package.json
 
+# Copy DB
+COPY --from=builder /usr/src/app/packages/db/dist ./packages/db/dist
+COPY --from=builder /usr/src/app/packages/db/package.json ./packages/db/package.json
+
 # Copy frontend assets
 COPY --from=builder /usr/src/app/apps/frontend/dist ./apps/frontend/dist
 

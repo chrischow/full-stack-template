@@ -5,7 +5,7 @@
 
 generator client {
   provider     = "prisma-client"
-  output       = "../src/generated/prisma"
+  output       = "../generated"
   moduleFormat = "cjs"
 }
 
@@ -49,4 +49,9 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt DateTime
+}
+
+model NewUser {
+  id   String @id @default(uuid(7)) @db.Uuid
+  name String
 }

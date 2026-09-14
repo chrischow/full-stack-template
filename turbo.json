@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*", "tsconfig*.json", "vite.config.*"],
+      "inputs": ["src/**/*", "generated/**/*", "tsconfig*.json", "vite.config.*"],
       "outputs": ["dist/**"],
       "passThroughEnv": ["VITE_*"]
     },

@@ -3,7 +3,5 @@
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
-    "prisma.config.ts",
-    "prisma/seed.ts",
   ]
 }

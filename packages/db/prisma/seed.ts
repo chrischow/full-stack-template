@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
-import { PrismaClient } from '@/generated/prisma/client'
+import { PrismaClient } from '../generated/client'
 
 const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?schema=public`
 const pool = new Pool({ connectionString })
