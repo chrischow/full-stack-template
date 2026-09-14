@@ -23,7 +23,7 @@ import { SessionMiddleware } from './middleware/session.middleware'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserModule } from './user/user.module'
 
-const FRONTEND_PATH = resolve(__dirname, '..', '..', '..', 'frontend', 'dist')
+const FRONTEND_PATH = resolve(__dirname, '..', '..', '..', 'apps', 'frontend', 'dist')
 
 @Module({
   imports: [

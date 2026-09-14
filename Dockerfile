@@ -19,7 +19,7 @@ FROM base-builder AS builder
 COPY --from=pruner /usr/src/app/out/json/ .
 COPY --from=pruner /usr/src/app/out/full/ .
 RUN npm ci
-RUN turbo build --filter=backend --filter=frontend
+RUN turbo build --filter=backend --filter=frontend --filter=@repo/db
 RUN npm prune --omit=dev
 
 # ---- STAGE 4: RUN APP ----
@@ -47,4 +47,4 @@ COPY --from=builder /usr/src/app/apps/backend/package.json ./apps/backend/packag
 
 EXPOSE 8080
 
-CMD ["apps/backend/dist/src/main.js"]
+CMD ["apps/backend/dist/main.js"]
