@@ -11,10 +11,11 @@ Decide on the response shape. This must be a Zod schema. Look in `packages/api-c
 
 When creating schemas:
 
-- Name the schema based on the contents of the schema, **NOT** the route that it is serving.
 - Decide whether to extend or create a schema from scratch:
   - If it is similar to another existing schema in that file or any of the common schemas, create the new schema by **extending** that existing schema.
   - Otherwise, create the new schema from scratch.
+- Design the schema around the required response structure. **DO NOT** call `z.array()` on individual schemas for collection endpoints. Instead, create a dedicated list schema, defining the schema first if needed (e.g. define `const EntitySchema = z.object(...)`, and then `const EntityListSchema = z.array(EntitySchema)`).
+- Name the schema based on the contents of the schema, **NOT** the route that it is serving.
 - The schema name must be in PascalCase, and have `Schema` as the suffix e.g. `PascalCaseSchema`.
 - The schema must have an accompanying TypeScript type defined right after it in the file. The type is to be inferred using `z.infer<typeof SomeSchema>`, and named the same as the schema without the `Schema` suffix.
 
