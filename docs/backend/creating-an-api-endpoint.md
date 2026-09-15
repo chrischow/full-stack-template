@@ -7,6 +7,7 @@ Decide on the response shape. This must be a Zod schema. Look in `packages/api-c
 - Else if only small modifications are required to an existing schema S, modify S, and make the necessary changes in the endpoints that use S.
 - Otherwise, you will need to create a new schema. Refer to the [instructions for creating Zod schemas](../api-contract/creating-zod-schemas.md).
 
+If enums need to be created, refer to the [instructions for creating enums](../api-contract/creating-enums.md).
 
 ## 2. Set Up the Route
 

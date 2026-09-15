@@ -19,5 +19,6 @@ This document serves as an index for guidelines on contributing features. It is 
 
 ## API Contract
 - [Creating schemas](./api-contract/creating-schemas.md): Instructions for creating Zod schemas
+- [Creating enums](./api-contract/creating-enums.md): Instructions for creating enums
 
 ## (WIP) Infra
