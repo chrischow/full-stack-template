@@ -17,4 +17,7 @@ This document serves as an index for guidelines on contributing features. It is 
 - [Creating components](./frontend/creating-components.md): Convention for organising frontend components
 - [Consuming an API endpoint](./frontend/consuming-an-api-endpoint.md): Process for using the shared contract for API queries from the frontend
 
+## API Contract
+- [Creating schemas](./api-contract/creating-schemas.md): Instructions for creating Zod schemas
+
 ## (WIP) Infra
