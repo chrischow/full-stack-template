@@ -10,7 +10,8 @@
       "git_staged_changes": "warn",
       "shadcn_search": "warn",
       "shadcn_docs": "warn",
-      "fetch_url": "warn"
+      "fetch_url": "warn",
+      "nest_generate": "warn"
     },
     "defaultTools": [
       "read",
