@@ -1,23 +1,23 @@
 ---
 name: craft-prd
-description: Generate a Product Requirements Document (PRD) for a new product or feature. Use this to gain clarity on requirements, concepts, and features.
+description: Generate a Product Requirements Document (PRD) for a new product or feature. Use this to gain clarity on requirements, concepts, and specific features.
 ---
 
 # Craft PRD
 
 ## Objective
 
-Write a new Product Requirements Document (PRD) that captures the **problem statement**, **proposed solution**, **user flows**, and **user stories** for the user's new product.
+Write a new Product Requirements Document (PRD) that captures the **problem statement**, **proposed solution**, **user flows**, and **user stories** for the user's new product or feature.
 
 ## Input
 
-The user will give you a spiel of the product idea. This will be highly varied: it could be a high-level concept, or a list of features. If the user does not provide any idea, ask the user for it.
+The user will give you a spiel of the product or feature idea. This will be highly varied: it could be a high-level concept, or a list of ideas. If the user does not provide any idea, ask the user for it.
 
 ## Task
 
 Ask the user clarification questions in four rounds: (1) Problem Statement, (2) Proposed Solution, (3) User Stories, and (4) User Flows. You MUST ask one question at time. You may ask more than one question per round.
 
-At the end of each round, you **MUST** present the user with a summary of the round, and ask the user if they want to make any refinements.
+At the end of each round, you **MUST** present the user with a summary of the round, and ask the user if they want to make any refinements. Refinements **MUST** be clarified before modification of the summmary.
 
 ### Problem Statement Round
 
