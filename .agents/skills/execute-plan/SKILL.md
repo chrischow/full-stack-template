@@ -21,6 +21,6 @@ Read the provided plan at $plan_filepath to understand the context, approach, sp
 Execute the steps in the **Steps** section of the plan in **strict order**. After completing each step:
 
 1. Notify the user that the step was completed.
-2. Run code quality checks.
+2. Run code quality checks (`lint:fix`, `format`, `check-types`).
 3. If there are any issues detected, resolve them.
 4. Repeat steps 2 and 3 until there are no issues from the code quality checks. **DO NOT SPIRAL.** The moment there is insufficient info from the code quality checks, **STOP EXECUTION IMMEDIATELY**, and ask the user for help.
