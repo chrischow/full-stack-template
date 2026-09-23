@@ -6,8 +6,8 @@
   "lockdown": {
     "customTools": {
       "current_date": "allow",
-      "run_npm_script": "warn",
-      "git_staged_changes": "warn",
+      "run_npm_script": "allow",
+      "git_staged_changes": "allow",
       "shadcn_search": "warn",
       "shadcn_docs": "warn",
       "fetch_url": "warn",
