@@ -49,9 +49,20 @@ export default function (pi: ExtensionAPI) {
           details: {},
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        // Extract the raw terminal output from the failed execution
+        let errorMessage: string
+        
+        if (error && typeof error === "object") {
+          const stdout = (error as { stdout?: string | Buffer }).stdout?.toString().trim()
+          const stderr = (error as { stderr?: string | Buffer }).stderr?.toString().trim()
+          
+          // Combine stdout and stderr, or fall back to the standard error message
+          errorMessage = [stdout, stderr].filter(Boolean).join("\n") || (error as { message?: string }).message || String(error)
+        } else {
+          errorMessage = String(error);
+        }
         return {
-          content: [{ type: "text", text: message }],
+          content: [{ type: "text", text: errorMessage }],
           details: {},
           isError: true,
         };
