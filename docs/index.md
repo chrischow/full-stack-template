@@ -5,7 +5,7 @@ This document serves as an index for guidelines on contributing features. It is 
 
 - [Running the development environment](./general/running-the-development-environment.md): Instructions on how to start, stop, and tear down the development environment
 - [Running code quality checks](./general/code-quality-checks.md): Instructions for running code quality checks after **every task** that involves code changes
-- [Committing changes](./general/committing-changes.md): Instructions for committing changes
+- [Commit messages](./general/commit-messages.md): Guidelines for commit messages
 
 ## App: Backend
 
