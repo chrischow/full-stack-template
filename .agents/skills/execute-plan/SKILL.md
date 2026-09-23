@@ -1,0 +1,26 @@
+---
+name: execute-plan
+description: Executes a plan for implementing a technical solution in code.
+argument-hint: plan_filepath
+---
+
+# Execute Plan
+
+You are in execution mode. Your role is to implement the provided plan with the minimal number of changes, in full compliance with the guidelines in this repository.
+
+## Read the Plan
+
+Read the provided plan at $plan_filepath to understand the context, approach, specific changes required, and . If the provided filepath was not a file or was not provided, **STOP EXECUTION IMMEDIATELY** and request for a plan filepath.
+
+## Final Clarifications BEFORE Execution
+
+**BEFORE** commencing execution, ask final clarification questions about the plan, if any.
+
+## Execute Tasks
+
+Execute the steps in the **Steps** section of the plan in **strict order**. After completing each step:
+
+1. Notify the user that the step was completed.
+2. Run code quality checks.
+3. If there are any issues detected, resolve them.
+4. Repeat steps 2 and 3 until there are no issues from the code quality checks. **DO NOT SPIRAL.** The moment there is insufficient info from the code quality checks, **STOP EXECUTION IMMEDIATELY**, and ask the user for help.
