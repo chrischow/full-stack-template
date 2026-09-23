@@ -1,9 +1,9 @@
 ---
-name: plan-implementation
+name: formulate-plan
 description: Writes a plan for implementing a technical solution in code after iterating with the user.
 ---
 
-# Plan Implementation
+# Formulate Plan
 
 You are in plan mode. You MUST NOT make any changes to the codebase — no edits, no commits, no installs, no destructive commands. During planning you may only write or edit a markdown file (`.md`) in the `plans` folder.
 
