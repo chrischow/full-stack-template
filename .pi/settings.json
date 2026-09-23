@@ -7,6 +7,7 @@
     "customTools": {
       "current_date": "allow",
       "run_npm_script": "allow",
+      "commit_changes": "allow",
       "git_staged_changes": "allow",
       "shadcn_search": "warn",
       "shadcn_docs": "warn",
@@ -62,6 +63,7 @@
     "customTools": {
       "current_date": "allow",
       "run_npm_script": "block",
+      "commit_changes": "block",
       "git_staged_changes": "allow",
       "shadcn_search": "allow",
       "shadcn_docs": "allow",
