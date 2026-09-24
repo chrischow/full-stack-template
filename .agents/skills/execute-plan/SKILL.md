@@ -22,7 +22,7 @@ Execute the steps in the **Steps** section of the plan in **strict order**. Afte
 
 1. Notify the user that the step was completed.
 2. Update the checklist item in the plan file.
-3. Run code quality checks (`lint:fix`, `format`, `check-types`).
+3. Run code quality checks (`lint:fix`, `format:fix`, `check-types`).
 4. If there are any issues detected, resolve them.
 5. Repeat steps 2 and 3 until there are no issues from the code quality checks. **DO NOT SPIRAL.** The moment there is insufficient info from the code quality checks, **STOP EXECUTION IMMEDIATELY**, and ask the user for help.
 6. Commit the changes.
