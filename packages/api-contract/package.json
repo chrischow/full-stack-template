@@ -19,6 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postinstall": "tsc",
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
     "lint": "eslint ."

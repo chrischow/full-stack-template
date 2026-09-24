@@ -13,7 +13,8 @@
     "lint": "turbo lint --continue",
     "lint:fix": "turbo lint --continue -- --fix",
     "check-types": "turbo check-types --continue",
-    "format": "prettier --write 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
+    "format": "prettier --check 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
+    "format:fix": "prettier --write 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
@@ -36,7 +37,7 @@
   "lint-staged": {
     "(apps|packages)/**/*.(js|jsx|ts|tsx)": [
       "turbo run lint --continue -- --fix",
-      "npm run format"
+      "npm run format:fix"
     ]
   },
   "dependencies": {
