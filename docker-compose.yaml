@@ -48,10 +48,15 @@ services:
       - ./apps/backend/.env.development
     environment:
       - DB_HOST=db
+      - APP_DOMAIN=http://localhost:8080
+      - OAUTH_CLIENT_CALLBACK_URL=http://localhost:8080/api/v1/auth/oauth/redirect
+      - PASSKEY_ORIGIN="http://localhost:8080"
     ports:
       - 8080:8080
     depends_on:
       - db
+    extra_hosts:
+      - "localhost:host-gateway"
     profiles:
       - prod-local
     

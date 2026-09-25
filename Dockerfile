@@ -19,38 +19,27 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # Copy source code
 COPY --from=pruner /usr/src/app/out/full/ .
 
+# Build
 ARG LOCAL_BUILD
 ENV NODE_TLS_REJECT_UNAUTHORIZED=${LOCAL_BUILD:+0}
 
 RUN turbo build --filter=backend --filter=frontend
 
+# Extract folders
+RUN rm -rf prod-backend && pnpm --filter=backend --prod deploy --ignore-scripts prod-backend
+
 # ---- STAGE 4: RUN APP ----
-# FROM public.ecr.aws/docker/library/node:22-trixie-slim
 FROM gcr.io/distroless/nodejs22-debian13:nonroot
 WORKDIR /usr/src/app
 
-# Copy root
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-
-# Copy API contract
-COPY --from=builder /usr/src/app/packages/api-contract/dist ./packages/api-contract/dist
-COPY --from=builder /usr/src/app/packages/api-contract/node_modules ./packages/api-contract/node_modules
-COPY --from=builder /usr/src/app/packages/api-contract/package.json ./packages/api-contract/package.json
-
-# Copy DB
-COPY --from=builder /usr/src/app/packages/db/dist ./packages/db/dist
-COPY --from=builder /usr/src/app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=builder /usr/src/app/packages/db/package.json ./packages/db/package.json
+# Copy compiled backend
+COPY --from=builder /usr/src/app/apps/backend/dist ./apps/backend/dist
+COPY --from=builder /usr/src/app/prod-backend/node_modules ./apps/backend/node_modules
+COPY --from=builder /usr/src/app/apps/backend/package.json ./apps/backend/package.json
 
 # Copy frontend assets
 COPY --from=builder /usr/src/app/apps/frontend/dist ./apps/frontend/dist
 
-# Copy compiled backend
-COPY --from=builder /usr/src/app/apps/backend/dist ./apps/backend/dist
-COPY --from=builder /usr/src/app/apps/backend/node_modules ./apps/backend/node_modules
-COPY --from=builder /usr/src/app/apps/backend/package.json ./apps/backend/package.json
-
 EXPOSE 8080
 
 CMD ["apps/backend/dist/main.js"]
-# CMD ["sleep", "infinity"]

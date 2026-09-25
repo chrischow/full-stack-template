@@ -10,6 +10,7 @@ staticClients:
   - id: full-stack-app
     redirectURIs:
       - 'http://localhost:3000/api/v1/auth/oauth/redirect'
+      - 'http://localhost:8080/api/v1/auth/oauth/redirect'
     name: 'Full Stack App'
     secret: auth-client-secret
     public: true
