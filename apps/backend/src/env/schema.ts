@@ -2,7 +2,7 @@ import { configDotenv } from 'dotenv'
 import z from 'zod'
 
 const nodeEnv = process.env.NODE_ENV || 'development'
-configDotenv({ path: `.env.${nodeEnv}` })
+configDotenv({ path: `../../.env.${nodeEnv}` })
 
 export const EnvSchema = z.object({
   NODE_ENV: z.enum(['local', 'development', 'test', 'staging', 'production']).default('development'),
