@@ -11,6 +11,7 @@ This document serves as an index for guidelines on contributing features. It is 
 
 - [Creating an API endpoint](./backend/creating-an-api-endpoint.md): Process for creating an API endpoint and its associated contract, and controller/service methods
 - [Database workflow](./backend/database-workflow.md): Process for amending the database schema
+- [Adding environment variables](./backend/adding-env-vars.md): Process for adding environment variables
 
 ## App: Frontend
 
