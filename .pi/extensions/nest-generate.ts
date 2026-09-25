@@ -49,7 +49,7 @@ export default function (pi: ExtensionAPI) {
     name: "nest_generate",
     label: "Nest Generate",
     description:
-      `Generate a NestJS artifact in apps/backend by running \`pnpm --filter backend dlx nest generate <schematic> <name>\` from the repo root. ` +
+      `Generate a NestJS artifact in apps/backend by running \`pnpm --filter=backend exec nest generate <schematic> <name>\` from the repo root. ` +
       `The schematic must be one of: ${SCHEMATICS.join(", ")} - and MUST be created in this order. ` +
       `Output is truncated to ${formatSize(DEFAULT_MAX_BYTES)} / ${DEFAULT_MAX_LINES} lines.`,
     promptSnippet: "Generate a NestJS artifact in apps/backend via nest generate",
@@ -82,9 +82,9 @@ export default function (pi: ExtensionAPI) {
         );
       }
 
-      const args = ["--filter", "backend", "dlx", "nest", "generate", schematic, name];
+      const args = ["--filter=backend", "exec", "nest", "generate", schematic, name];
 
-      const result = await pi.exec("npm", args, {
+      const result = await pi.exec("pnpm", args, {
         cwd: ctx.cwd,
         signal,
         timeout: TIMEOUT_MS,

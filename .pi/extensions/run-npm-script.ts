@@ -9,10 +9,10 @@ const VALID_SCRIPTS = [
   "check-types",
   "format",
   "test",
-  "db:sync -w packages/db",
-  "db:seed:run -w packages/db",
-  "db:migration:run -w packages/db",
-  "db:generate -w packages/db",
+  "--filter=backend db:sync",
+  "--filter=backend db:seed:run",
+  "--filter=backend db:migration:run",
+  "--filter=backend db:generate",
 ] as const;
 type ScriptName = (typeof VALID_SCRIPTS)[number];
 
