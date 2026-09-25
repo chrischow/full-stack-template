@@ -6,7 +6,7 @@ import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import { contract } from '@repo/api-contract'
 
 const link = new OpenAPILink(contract, {
-  url: 'http://localhost:3000/api/v1',
+  url: `${window.location.origin}/api/v1`,
   fetch: (request, init) => {
     return globalThis.fetch(request, {
       ...init,
