@@ -38,7 +38,7 @@ export default function (pi: ExtensionAPI) {
       }
 
       try {
-        const output = execSync(`npm run ${script}`, {
+        const output = execSync(`pnpm ${script}`, {
           cwd: ctx.cwd,
           encoding: "utf-8",
           signal,

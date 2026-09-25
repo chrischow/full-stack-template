@@ -25,7 +25,7 @@ export default function (pi: ExtensionAPI) {
 
       try {
         const queryArg = query ? ` ${shellQuote(query)}` : "";
-        const output = execSync(`npm exec -w apps/frontend -- npx shadcn@latest search @shadcn -q ${queryArg}`, {
+        const output = execSync(`pnpm --filter frontend dlx shadcn@latest search @shadcn -q ${queryArg}`, {
           cwd: ctx.cwd,
           encoding: "utf-8",
           signal,

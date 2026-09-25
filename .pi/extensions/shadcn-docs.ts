@@ -25,7 +25,7 @@ export default function (pi: ExtensionAPI) {
 
       try {
         const componentArg = component ? ` ${shellQuote(component)}` : "";
-        const output = execSync(`npm exec -w apps/frontend -- npx shadcn@latest docs ${componentArg}`, {
+        const output = execSync(`pnpm --filter frontend dlx shadcn@latest docs ${componentArg}`, {
           cwd: ctx.cwd,
           encoding: "utf-8",
           signal,

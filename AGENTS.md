@@ -4,7 +4,7 @@ Guidance for working in this repo. This file captures the durable norms and gotc
 
 ## What this is
 
-An **npm + Turborepo monorepo** with a **contract-first** architecture for near-end-to-end type safety:
+An **pnpm + Turborepo monorepo** with a **contract-first** architecture for near-end-to-end type safety:
 
 - `apps/backend` — NestJS (Express) API, Prisma ORM
 - `apps/frontend` — React 19 + Vite + TanStack Query
@@ -15,15 +15,15 @@ An **npm + Turborepo monorepo** with a **contract-first** architecture for near-
 Run everything from the repo root via the workspace scripts:
 
 ```bash
-npm i           # install
-npm run dev     # turbo dev across all workspaces
-npm run build   # turbo build across all workspaces
+ppnpm i           # install
+ppnpm dev     # turbo dev across all workspaces
+ppnpm build   # turbo build across all workspaces
 ```
 
 **DO NOT** invent ad-hoc commands.
 
 Notes:
-- `npm test` at the repo root currently just exits 1 — there are no root-level tests. Unit tests live in `apps/backend` (`npm test` → jest) and cover `*.spec.ts` files.
+- `pnpm test` at the repo root currently just exits 1 — there are no root-level tests. Unit tests live in `apps/backend` (`pnpm test` → jest) and cover `*.spec.ts` files.
 - URLs (with infra up): frontend `http://localhost:3000`, backend `http://localhost:8080`, Mailpit `http://localhost:8025`, Dex `http://localhost:5556/dex`.
 
 ## Architecture invariants (do not break)

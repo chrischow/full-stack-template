@@ -30,7 +30,7 @@ A full stack template for bootstrapping maintainable and policy-compliant (WIP) 
 2. Install [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/)
 
 ### Dependencies
-Install dependencies by running `npm i`.
+Install dependencies by running `pnpm i`.
 
 ### (Optional) Pi Coding Agent Setup
 
@@ -43,20 +43,20 @@ pi
 ## Usage
 
 ### Starting the App
-Launch supporting services with `npm run dev:infra:start`.
+Launch supporting services with `pnpm dev:infra:start`.
 
 Start the backend:
 
 ```bash
 cd backend
-npm run dev
+pnpm dev
 ```
 
 Start the frontend in another shell:
 
 ```bash
 cd frontend
-npm run dev
+pnpm dev
 ```
 
 Access the app and supporting services at the following URLs:
@@ -69,24 +69,24 @@ Access the app and supporting services at the following URLs:
 ### Updating the DB Schema (Development)
 After amending the schema in `backend/prisma/schema.prisma`:
 
-- For quick incremental changes, run `npm run db:sync`
-- For a complete reset, run `npm run db:reset && npm run db:sync`
+- For quick incremental changes, run `pnpm db:sync`
+- For a complete reset, run `pnpm db:reset && pnpm db:sync`
 
 Thereafter, run seeds as required:
 
 ```bash
-npm run db:seed:run
+pnpm db:seed:run
 ```
 
 ### Creating Migrations
-Generate a migration with `npm run db:migration:gen` and provide a name in `snake-case`.
+Generate a migration with `pnpm db:migration:gen` and provide a name in `snake-case`.
 
-Then, run the migrations with `npm run db:migration:run`.
+Then, run the migrations with `pnpm db:migration:run`.
 
 Finally, re-generate the Prisma client with `npx prisma generate`.
 
 ### Seeding the DB
-Amend `backend/prisma/seed.ts`, then run `npm run db:seed:run`.
+Amend `backend/prisma/seed.ts`, then run `pnpm db:seed:run`.
 
 ## Development
 Refer to the [Development docs](./docs/index.md).

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "turbo build",
     "dev": "turbo dev",
     "dev:infra:start": "docker-compose up -d --wait",
@@ -36,21 +37,12 @@
   },
   "lint-staged": {
     "(apps|packages)/**/*.(js|jsx|ts|tsx)": [
-      "npm run lint:fix",
-      "npm run format:fix"
+      "pnpm lint:fix",
+      "pnpm format:fix"
     ]
   },
   "dependencies": {
     "zod": "^4.3.6"
   },
-  "devEngines": {
-    "packageManager": {
-      "name": "npm",
-      "version": "10.9.8"
-    }
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "packageManager": "pnpm@12.6.0"
 }
