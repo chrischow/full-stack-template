@@ -23,6 +23,14 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/login/otp" element={<OtpPage />} />
             <Route path="/login/redirect" element={<LoginRedirectPage />} />
+            {import.meta.env.DEV && (
+              <Route path="/wireframes">
+                <Route element={<WithSidebarLayout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="account" element={<AccountSettingsPage />} />
+                </Route>
+              </Route>
+            )}
           </Route>
         </Routes>
       </BrowserRouter>

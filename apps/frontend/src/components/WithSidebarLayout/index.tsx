@@ -22,7 +22,7 @@ const WithSidebarLayout = () => {
 
   const { logout } = useAuthContext()
 
-  const navItems = [{ label: 'Home', to: '/', icon: BiHomeAlt }]
+  const navItems = [{ label: 'Home', to: '', icon: BiHomeAlt }]
 
   return (
     <div className="w-dvw h-dvh gap-0">
@@ -49,7 +49,7 @@ const WithSidebarLayout = () => {
           </SidebarContent>
           <SidebarFooter>
             <SidebarMenuItem>
-              <SidebarMenuButton render={<Link to={'/account'} />}>
+              <SidebarMenuButton render={<Link to={'account'} />}>
                 <BiCog />
                 <span>Account Settings</span>
               </SidebarMenuButton>
