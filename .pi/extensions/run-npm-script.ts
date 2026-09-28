@@ -8,6 +8,7 @@ const VALID_SCRIPTS = [
   "lint:fix",
   "check-types",
   "format",
+  "format:fix",
   "test",
   "--filter=backend db:sync",
   "--filter=backend db:seed:run",
