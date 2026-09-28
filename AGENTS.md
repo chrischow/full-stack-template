@@ -7,7 +7,7 @@ This file captures the durable norms and gotchas that are not obvious from the c
 A **pnpm + Turborepo monorepo** with a **contract-first** architecture for near-end-to-end type safety:
 
 - `apps/backend` — NestJS (Express) API
-- `apps/frontend` — React 19 + Vite + TanStack Query
+- `apps/frontend` — React 19 + Vite + TanStack Query. Files under `src/wireframes` are placeholder-only mock pages on a DEV-only `/wireframes` route (no data fetching) — not prod code. See `docs/frontend/creating-wireframes.md` and `docs/frontend/promoting-wireframes.md`.
 - `packages/api-contract` — shared oRPC contracts + Zod schemas (the single source of truth)
 - `packages/db` — shared Prisma ORM client
 
