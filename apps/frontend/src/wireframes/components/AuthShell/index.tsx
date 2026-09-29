@@ -12,7 +12,7 @@ const AuthShell = ({ children }: AuthShellProps) => {
         <div className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-primary/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-sky-200/40 blur-3xl" />
 
-        <div className="relative flex flex-col gap-8">
+        <div className="relative my-auto flex flex-col gap-8">
           <div className="flex items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-sky-400 text-white shadow-md shadow-primary/20">
               <Rocket className="size-5" />
