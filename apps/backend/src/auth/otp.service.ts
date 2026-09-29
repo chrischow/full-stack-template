@@ -155,9 +155,7 @@ export class OtpService {
       })
     }
 
-    const currentOtpHash = computeHmac(currentOtp.value)
-
-    if (crypto.timingSafeEqual(Buffer.from(currentOtpHash, 'hex'), Buffer.from(computeHmac(otp), 'hex'))) {
+    if (!crypto.timingSafeEqual(Buffer.from(currentOtp.value, 'hex'), Buffer.from(computeHmac(otp), 'hex'))) {
       const remainingTtl = await this.appCache.getRemainingTtl({ key: otpKey, errMsg, action })
 
       if (remainingTtl === 0) {
