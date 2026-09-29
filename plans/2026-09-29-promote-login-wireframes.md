@@ -71,10 +71,10 @@ Keep the **current prod two-phase logic** (`isOtpRequested` state; inline email 
 - [x] Step 2: Move + rewrite `LoginPage` and `OtpPage` (wireframe email phase folded into OtpPage phase 1) into `src/pages/login/**` with real API wiring (see above); restyle `PasskeyLoginButton` to match the design.
 - [x] Step 3: Add `src/hooks/useOtp.ts` with the `useOtp` hook (generate/verify mutations); barrel-export from `src/hooks/index.ts`.
 - [x] Step 4: Update `App.tsx` — prod routes `/login` + `/login/otp`; rewrite `/wireframes` DEV block routes to the promoted pages (drop `login/email`); remove wireframe imports.
-- [ ] Step 5: Ask the user to delete the promoted wireframe files: `src/wireframes/pages/login/**` (login/email/otp pages) and `src/wireframes/components/AuthShell/**`; keep the `.gitkeep`s in `wireframes/pages` and `wireframes/components`.
-- [ ] Step 6: Quality checks via `run_npm_script`: `lint:fix`, `format`, `check-types`.
-- [ ] Step 7: Manual E2E test (below); fix issues.
-- [ ] Step 8: Commit (Conventional Commits, e.g. `feat: promote login flow to prod`).
+- [x] Step 5: Ask the user to delete the promoted wireframe files: `src/wireframes/pages/login/**` (login/email/otp pages) and `src/wireframes/components/AuthShell/**`; keep the `.gitkeep`s in `wireframes/pages` and `wireframes/components`.
+- [x] Step 6: Quality checks via `run_npm_script`: `lint:fix`, `format`, `check-types`.
+- [x] Step 7: Manual E2E test (below); fix issues.
+- [x] Step 8: Commit (Conventional Commits, e.g. `feat: promote login flow to prod`).
 
 ## Verification
 
