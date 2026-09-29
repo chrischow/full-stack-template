@@ -35,7 +35,7 @@ const EmailPage = () => {
     setError(undefined)
     setIsPending(true)
     timeoutRef.current = setTimeout(() => {
-      navigate('../otp', { state: { email } })
+      navigate('../otp', { relative: 'path' })
     }, MOCK_DELAY_MS)
   }
 
