@@ -52,13 +52,9 @@ const PasskeyLoginButton = () => {
   const isPending = isLoginVerificationPending || isLoginPending
 
   return (
-    <Button className="w-full" onClick={handlePasskeyLogin}>
-      {isPending && <Loader />}
-      {!isPending && (
-        <>
-          <IoMdFingerPrint /> Login with Passkey
-        </>
-      )}
+    <Button variant="secondary" size="lg" className="h-11 w-full" onClick={handlePasskeyLogin} disabled={isPending}>
+      {isPending ? <Loader className="animate-spin" /> : <IoMdFingerPrint />}
+      Continue with Passkey
     </Button>
   )
 }

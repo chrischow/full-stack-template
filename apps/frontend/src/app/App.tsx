@@ -9,9 +9,6 @@ import HomePage from '@/pages/home'
 import LoginPage from '@/pages/login'
 import OtpPage from '@/pages/login/otp'
 import LoginRedirectPage from '@/pages/login/redirect'
-import WireframeLoginPage from '@/wireframes/pages/login'
-import WireframeEmailPage from '@/wireframes/pages/login/email'
-import WireframeOtpPage from '@/wireframes/pages/login/otp'
 
 function App() {
   return (
@@ -32,9 +29,8 @@ function App() {
                   <Route index element={<HomePage />} />
                   <Route path="account" element={<AccountSettingsPage />} />
                 </Route>
-                <Route path="login" element={<WireframeLoginPage />} />
-                <Route path="login/email" element={<WireframeEmailPage />} />
-                <Route path="login/otp" element={<WireframeOtpPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="login/otp" element={<OtpPage />} />
               </Route>
             )}
           </Route>

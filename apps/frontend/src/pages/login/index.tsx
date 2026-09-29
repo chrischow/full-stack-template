@@ -3,8 +3,9 @@ import { HiOutlineMail } from 'react-icons/hi'
 import { useNavigate } from 'react-router'
 
 import { BACKEND_PREFIX } from '@/app/constants'
+import AuthShell from '@/components/AuthShell'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import PasskeyLoginButton from './PasskeyLoginButton'
 
@@ -12,32 +13,55 @@ const LoginPage = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="w-dvw h-dvh flex flex-col justify-center content-center">
-      <Card className="w-md self-center">
+    <AuthShell>
+      <Card className="rounded-2xl shadow-lg shadow-primary/5 ring-border">
         <CardHeader>
-          <CardTitle className="text-center text-3xl font-bold">Full Stack Template</CardTitle>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
+          <p className="text-sm text-muted-foreground">Sign in with one of the options below.</p>
         </CardHeader>
         <CardContent>
-          <Button
-            className="w-full"
-            onClick={() => {
-              window.location.href = `${BACKEND_PREFIX}/auth/oauth`
-            }}
-          >
-            <BiLogoGoogle /> Login with Google
-          </Button>
-          <Button
-            className="w-full"
-            onClick={async () => {
-              navigate('otp')
-            }}
-          >
-            <HiOutlineMail /> Request an OTP
-          </Button>
-          <PasskeyLoginButton />
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-11 w-full bg-white"
+              onClick={() => {
+                window.location.href = `${BACKEND_PREFIX}/auth/oauth`
+              }}
+            >
+              <BiLogoGoogle />
+              Continue with Google
+            </Button>
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">or continue with</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <Button
+              size="lg"
+              className="h-11 w-full"
+              onClick={() => {
+                navigate('otp')
+              }}
+            >
+              <HiOutlineMail />
+              Continue with Email
+            </Button>
+            <PasskeyLoginButton />
+          </div>
+          <div className="flex items-center justify-center gap-1.5 pt-6 text-xs text-muted-foreground">
+            <span>By continuing, you agree to our</span>
+            <span className="cursor-pointer text-foreground underline underline-offset-2 hover:text-primary">
+              Terms
+            </span>
+            <span>and</span>
+            <span className="cursor-pointer text-foreground underline underline-offset-2 hover:text-primary">
+              Privacy Policy
+            </span>
+          </div>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   )
 }
 
