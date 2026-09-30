@@ -17,7 +17,7 @@ Run everything from the repo root using the `run_npm_script` tool.
 
 **DO NOT** invent ad-hoc commands.
 
-- **After every code change**, run the code quality checks via `run_npm_script`: `lint:fix`, `format`, `check-types`                                                               
+- **After every code change**, run the code quality checks via `run_npm_script`: `lint:fix`, `format:fix`, `check-types`                                                               
 - **Create NestJS components only with `nest_generate`**, in this order: module → service → provider → gateway → pipe → filter → guard → interceptor → controller → decorator → middleware. Never hand-write them.
 
 
