@@ -9,6 +9,7 @@
       "run_npm_script": "allow",
       "commit_changes": "allow",
       "git_changes": "allow",
+      "git_worktree_add": "allow",
       "shadcn_search": "warn",
       "shadcn_docs": "warn",
       "fetch_url": "warn",
