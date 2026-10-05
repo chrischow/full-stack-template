@@ -45,17 +45,9 @@ pi
 ### Starting the App
 Launch supporting services with `pnpm dev:infra:start`.
 
-Start the backend:
+Start the app from the root of the repo:
 
 ```bash
-cd backend
-pnpm dev
-```
-
-Start the frontend in another shell:
-
-```bash
-cd frontend
 pnpm dev
 ```
 
@@ -67,26 +59,26 @@ Access the app and supporting services at the following URLs:
 - Dex IdP: http://localhost:5556/dex - mainly for auth redirect
 
 ### Updating the DB Schema (Development)
-After amending the schema in `backend/prisma/schema.prisma`:
+After amending the schema in `packages/db/prisma/schema.prisma`:
 
-- For quick incremental changes, run `pnpm db:sync`
-- For a complete reset, run `pnpm db:reset && pnpm db:sync`
+- For quick incremental changes, run `pnpm --filter=@repo/db db:sync`
+- For a complete reset, run `pnpm --filter=@repo/db db:reset && pnpm --filter=@repo/db db:sync`
 
 Thereafter, run seeds as required:
 
 ```bash
-pnpm db:seed:run
+pnpm --filter=@repo/db db:seed:run
 ```
 
 ### Creating Migrations
-Generate a migration with `pnpm db:migration:gen` and provide a name in `snake-case`.
+Generate a migration with `pnpm --filter=@repo/db db:migration:gen` and provide a name in `snake-case`.
 
-Then, run the migrations with `pnpm db:migration:run`.
+Then, run the migrations with `pnpm --filter=@repo/db db:migration:run`.
 
-Finally, re-generate the Prisma client with `npx prisma generate`.
+Finally, re-generate the Prisma client with `pnpm --filter=@repo/db pnpm db:generate`.
 
 ### Seeding the DB
-Amend `backend/prisma/seed.ts`, then run `pnpm db:seed:run`.
+Amend `packages/db/prisma/seed.ts`, then run `pnpm --filter=@repo/db db:seed:run`.
 
 ## Development
 Refer to the [Development docs](./docs/index.md).
