@@ -16,13 +16,13 @@ Read the provided plan at $plan_filepath to understand the context, approach, sp
 
 **BEFORE** commencing execution, ask final clarification questions about the plan, if any.
 
-## Execute Tasks
+## Execute Steps
 
-Execute the steps in the **Steps** section of the plan in **strict order**. After completing each step:
+Execute the steps in the **Steps** section of the plan in **strict order**. After completing **EACH** step:
 
 1. Notify the user that the step was completed.
 2. Update the checklist item in the plan file.
 3. Run code quality checks.
 4. If there are any issues detected, resolve them.
-5. Repeat steps 2 and 3 until there are no issues from the code quality checks. **DO NOT SPIRAL.** The moment there is insufficient info from the code quality checks, **STOP EXECUTION IMMEDIATELY**, and ask the user for help.
-6. Commit the changes.
+5. Repeat items 2 and 3 in this list until there are no issues from the code quality checks. **DO NOT SPIRAL.** The moment there is insufficient info regarding the plan or from feedback from the code quality checks, **STOP EXECUTION IMMEDIATELY**, and ask the user for help.
+6. Commit the changes, including changes to the plan (e.g. marking steps done).

@@ -49,7 +49,10 @@ Your plan file should use markdown with clear sections:
   - [ ] Step 2 description
 - **Verification** — How to test the changes end-to-end (run the code, run tests, manual checks).
 
-Keep the plan concise enough to scan quickly, but detailed enough to execute effectively.
+Additional instructions regarding the plan:
+
+- Keep the plan concise enough to scan quickly, but detailed enough to execute effectively.
+- At the start of the **Steps** section, include a note to state that after **EACH STEP**, code quality checks should be run, and changes should be committed. The committed changes should include any changes to the plan file (e.g. marking steps done).
 
 ### Revising After Feedback
 
