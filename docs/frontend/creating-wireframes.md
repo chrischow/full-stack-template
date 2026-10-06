@@ -4,7 +4,7 @@ This document describes how to create a wireframe: a placeholder-only, interacti
 
 ## Where Wireframes Live
 
-Wireframes live under `apps/frontend/src/wireframes`. The conventions in [Creating Components](./creating-components.md) apply — component naming, folder structure, nesting — except that everything is placed under `apps/frontend/src/wireframes` instead of `apps/frontend/src/pages` or `apps/frontend/src/components`.
+Wireframes live under `apps/frontend/src/wireframes`. The conventions in [Creating Components](./creating-components.md) apply — component naming, folder structure, nesting — except that everything is placed under `apps/frontend/src/wireframes` instead of `apps/frontend/src`.
 
 ### Pages
 
@@ -18,6 +18,8 @@ Page folders mirror the frontend route structure under the `/wireframes` prefix,
 Reuse existing components from `apps/frontend/src/components` where applicable.
 
 If a wireframe needs its own reusable component that is not (yet) used in prod, place it under `apps/frontend/src/wireframes/components` following the usual component conventions. Do NOT add wireframe-only components to `apps/frontend/src/components`.
+
+Components should be built or managed using the `shadcn` skill.
 
 ## Placeholders Only
 

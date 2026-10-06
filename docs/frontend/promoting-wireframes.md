@@ -2,6 +2,9 @@
 
 This document describes how to promote an approved wireframe to prod code.
 
+## Production Check
+Check that the wireframe (page and its components) has been implemented in accordances with the guidelines in the `shadcn` skill. If the wireframe is not in compliance, refactor the non-compliant page and its components first.
+
 ## Move the Wireframe into Prod
 
 Move the approved pages and/or components from `apps/frontend/src/wireframes` into the prod source tree, following the organisation rules in [Creating Components](./creating-components.md):
