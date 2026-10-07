@@ -92,4 +92,4 @@ List of user stories
 3. <Other steps>
 ```
 
-Save the PRD to `../../../rfc/<yyyy-mm-dd>-prd.md`.
+Save the PRD to `../../../prd/<yyyy-mm-dd>-prd.md`.
