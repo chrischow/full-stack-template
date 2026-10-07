@@ -14,8 +14,8 @@
     "lint": "turbo lint --continue",
     "lint:fix": "turbo lint --continue -- --fix",
     "check-types": "turbo check-types --continue",
-    "format": "prettier --check 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
-    "format:fix": "prettier --write 'apps/**/*.{ts,tsx,js,jsx}' 'packages/**/*.{ts,js}'",
+    "format": "prettier --check 'apps/**/*.{ts,tsx,js,jsx,mjs}' 'packages/**/*.{ts,js,mjs}' 'infra/**/*.{ts,js,mjs}'",
+    "format:fix": "prettier --write 'apps/**/*.{ts,tsx,js,jsx,mjs}' 'packages/**/*.{ts,js,mjs}' 'infra/**/*.{ts,js,mjs}'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
@@ -36,7 +36,7 @@
     "typescript-eslint": "^8.58.1"
   },
   "lint-staged": {
-    "(apps|packages)/**/*.(js|jsx|ts|tsx)": [
+    "(apps|packages|infra)/**/*.(js|jsx|ts|tsx|mjs)": [
       "pnpm lint:fix",
       "pnpm format:fix"
     ]

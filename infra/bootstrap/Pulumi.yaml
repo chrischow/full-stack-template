@@ -1,0 +1,10 @@
+name: bootstrap
+description: Project for bootstrapping a Pulumi state bucket
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript

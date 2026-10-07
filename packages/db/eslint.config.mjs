@@ -6,14 +6,10 @@ import globals from 'globals'
 export default defineConfig([
   ...baseConfig,
   {
-    ignores: [
-      "index.js",
-      "index.d.ts",
-      "prisma/migrations/**/*",
-    ],
+    ignores: ['index.js', 'index.d.ts', 'prisma/migrations/**/*'],
   },
   {
-    files: ["**/*.ts"],
+    files: ['**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -21,8 +17,8 @@ export default defineConfig([
       parser: tsParser,
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname, 
+        tsconfigRootDir: import.meta.dirname,
       },
     },
-  }
+  },
 ])

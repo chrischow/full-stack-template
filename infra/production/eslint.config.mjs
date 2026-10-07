@@ -1,4 +1,5 @@
 import { baseConfig } from '@repo/eslint-config/base'
+import { infraRules } from '@repo/eslint-config/rules'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import { defineConfig } from 'eslint/config'
@@ -22,8 +23,7 @@ export default defineConfig([
       '@typescript-eslint': tsPlugin,
     },
     rules: {
-      'no-redeclare': 'off',
-      '@typescript-eslint/no-redeclare': 'off',
+      ...infraRules,
     },
   },
 ])

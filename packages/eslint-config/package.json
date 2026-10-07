@@ -9,6 +9,7 @@
     "eslint-plugin-simple-import-sort": "^13.0.0"
   },
   "exports": {
-    "./base": "./base.js"
+    "./base": "./base.js",
+    "./rules": "./rules.js"
   }
 }
