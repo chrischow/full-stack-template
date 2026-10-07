@@ -1,6 +1,6 @@
-# Full Stack Template
+# Starter Kit
 
-A full stack template for bootstrapping maintainable and policy-compliant (WIP) web apps that enable developers to build fast.
+A modern AI-native stack for (a) rapid prototyping by AI and (b) production, managed by both AI agents and humans.
 
 ## Key Features and Tools
 
