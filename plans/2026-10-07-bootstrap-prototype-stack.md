@@ -132,23 +132,24 @@ Out of scope (deferred): `infra/scripts/`, `docs/infra/`, `docs/index.md`, all C
 - [x] Step 3 — Add `infra/bootstrap/Pulumi.prototype.yaml` (`accountId`, `aws:region: ap-southeast-1`,
       tags).
 - [x] Step 4 — Repo housekeeping: `.gitignore` Pulumi entries + remove stale Terraform/Terragrunt block.
-- [ ] Step 5 — Finalize the Runbook below (real profile name) and verify `Pulumi.yaml`.
+- [x] Step 5 — Finalize the Runbook below (real profile name) and verify `Pulumi.yaml`.
 - [ ] Step 6 — Write the finalized Runbook into `infra/bootstrap/README.md` (the authoritative copy).
 
 ## Runbook: one-time prototype bootstrap and state migration
 
-Run from `infra/bootstrap`. `<profile>` is the user's actual prototype-account profile; `AWS_PROFILE` is
-never committed. Replace `<accountId>` with the prototype account ID (`aws sts get-caller-identity`).
+Run from `infra/bootstrap`. AWS profile is `starter-kit-prototype`; `AWS_PROFILE` is
+never committed. Dummy account ID is `123456789012` (replace with real account ID from
+`aws sts get-caller-identity` when deploying to actual AWS).
 
 1. **Point the program at the prototype stack.** `Pulumi.prototype.yaml` already contains
-   `config: { bootstrap:accountId: "<accountId>", bootstrap:appName: fst, aws:region: ap-southeast-1 }`.
+   `config: { bootstrap:accountId: "123456789012", bootstrap:appName: fst, aws:region: ap-southeast-1 }`.
 2. **First apply on the local backend** (creates the bucket; uses the passphrase secrets provider
    because the CMK does not exist yet):
    ```bash
    cd infra/bootstrap
    pulumi login file://.
    pulumi stack init prototype
-   AWS_PROFILE=<profile> pulumi up
+   AWS_PROFILE=starter-kit-prototype pulumi up
    ```
    Capture the `stateBucketName` output (`pulumi stack output stateBucketName`).
 
@@ -173,7 +174,7 @@ never committed. Replace `<accountId>` with the prototype account ID (`aws sts g
 6. **Verify the migrated backend:**
    ```bash
    pulumi stack ls
-   AWS_PROFILE=<profile> pulumi preview   # expect "no changes"
+   AWS_PROFILE=starter-kit-prototype pulumi preview   # expect "no changes"
    ```
 7. **Record the backend URL and account ID** for later projects: workload projects will log in with
    `pulumi login s3://<bucket>/prototype`.
