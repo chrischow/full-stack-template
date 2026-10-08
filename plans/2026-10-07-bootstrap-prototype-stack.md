@@ -133,7 +133,7 @@ Out of scope (deferred): `infra/scripts/`, `docs/infra/`, `docs/index.md`, all C
       tags).
 - [x] Step 4 — Repo housekeeping: `.gitignore` Pulumi entries + remove stale Terraform/Terragrunt block.
 - [x] Step 5 — Finalize the Runbook below (real profile name) and verify `Pulumi.yaml`.
-- [ ] Step 6 — Write the finalized Runbook into `infra/bootstrap/README.md` (the authoritative copy).
+- [x] Step 6 — Write the finalized Runbook into `infra/bootstrap/README.md` (the authoritative copy).
 
 ## Runbook: one-time prototype bootstrap and state migration
 
