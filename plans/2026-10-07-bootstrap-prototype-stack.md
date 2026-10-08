@@ -127,7 +127,7 @@ Out of scope (deferred): `infra/scripts/`, `docs/infra/`, `docs/index.md`, all C
 - [x] Step 1 — **USER ACTION (pause here):** add pinned `@pulumi/aws` to
       `infra/bootstrap/package.json` and run `pnpm install`. The agent stops and waits for the user to
       do this; do not proceed until the dependency is installed.
-- [ ] Step 2 — Implement `infra/bootstrap/index.ts` (prototype resources, config-driven `accountId`,
+- [x] Step 2 — Implement `infra/bootstrap/index.ts` (prototype resources, config-driven `accountId`,
       generic stack naming, `protect`/`retainOnDelete`, outputs).
 - [ ] Step 3 — Add `infra/bootstrap/Pulumi.prototype.yaml` (`accountId`, `aws:region: ap-southeast-1`,
       tags).
