@@ -131,7 +131,7 @@ Out of scope (deferred): `infra/scripts/`, `docs/infra/`, `docs/index.md`, all C
       generic stack naming, `protect`/`retainOnDelete`, outputs).
 - [x] Step 3 — Add `infra/bootstrap/Pulumi.prototype.yaml` (`accountId`, `aws:region: ap-southeast-1`,
       tags).
-- [ ] Step 4 — Repo housekeeping: `.gitignore` Pulumi entries + remove stale Terraform/Terragrunt block.
+- [x] Step 4 — Repo housekeeping: `.gitignore` Pulumi entries + remove stale Terraform/Terragrunt block.
 - [ ] Step 5 — Finalize the Runbook below (real profile name) and verify `Pulumi.yaml`.
 - [ ] Step 6 — Write the finalized Runbook into `infra/bootstrap/README.md` (the authoritative copy).
 

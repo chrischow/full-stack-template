@@ -7,27 +7,12 @@
 **/.env.production
 **/.env.local
 
-### Terraform ###
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate files
-*.tfstate
-*.tfstate.*
-
 # .zip files for lambda function
 *.zip
 
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
-
-### Terragrunt ###
-# terragrunt cache directories
-**/.terragrunt-cache/*
-
-# Debug logs
-terragrunt-debug.tfvars.json
+# Pulumi
+**/.pulumi/
+*.state.json
 
 # Lambda Layer package & dependencies
 layers/
