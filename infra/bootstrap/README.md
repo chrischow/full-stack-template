@@ -10,46 +10,118 @@ It must be initialized before other Pulumi projects (`prototype`, `production`) 
 - `staging`: State backend for the staging environment (future)
 - `production`: State backend for the production environment (future)
 
-## Runbook: one-time prototype bootstrap and state migration
+## Credentials
 
-Run from `infra/bootstrap`. AWS profile is `starter-kit-prototype`; `AWS_PROFILE` is
-never committed. Dummy account ID is `123456789012` (replace with real account ID from
-`aws sts get-caller-identity` when deploying to actual AWS).
+### Sandbox
 
-1. **Point the program at the prototype stack.** `Pulumi.prototype.yaml` already contains
-   `config: { bootstrap:accountId: "123456789012", bootstrap:appName: fst, aws:region: ap-southeast-1 }`.
-2. **First apply on the local backend** (creates the bucket; uses the passphrase secrets provider
-   because the CMK does not exist yet):
-   ```bash
-   cd infra/bootstrap
-   pulumi login file://.
-   pulumi stack init prototype
-   AWS_PROFILE=starter-kit-prototype pulumi up
-   ```
-   Capture the `stateBucketName` output (`pulumi stack output stateBucketName`).
+The bootstrap can be completed using either (a) your admin user account or (b) a dedicated IAM user.
 
-   > **`file://.` vs `--local`.** Both select the local backend. `pulumi login --local` is shorthand for
-   > `pulumi login file://~` and stores state under `~/.pulumi` (outside the repo).
-   > `pulumi login file://.` stores it under `./.pulumi` in the project, which
-   > `infra/bootstrap/.gitignore` already ignores. Either works; we use `file://.` to keep the throwaway
-   > pre-migration state contained in the project directory.
-3. **Export the local state:**
-   ```bash
-   pulumi stack export --file prototype.state.json
-   ```
-4. **Re-init the stack against the S3 backend and import:**
-   ```bash
-   pulumi login "s3://<bucket>/bootstrap"
-   pulumi stack init prototype --secrets-provider "awskms://<cmk-arn>"
-   pulumi stack import --file prototype.state.json
-   ```
-   `<bucket>` = the `stateBucketName` output (`<appName>-pulumi-state-<envSlug>-<accountId>`); `<cmk-arn>` =
-   the `stateKeyArn` output. From here on the CMK is the stack's secrets provider.
-5. **Delete the local state file** (`prototype.state.json`) — it is gitignored, but discard it explicitly.
-6. **Verify the migrated backend:**
-   ```bash
-   pulumi stack ls
-   AWS_PROFILE=starter-kit-prototype pulumi preview   # expect "no changes"
-   ```
-7. **Record the backend URL and account ID** for later projects: workload projects will log in with
-   `pulumi login s3://<bucket>/prototype`.
+- If using your admin user account: Login via the CLI as per normal
+- If using a dedicated IAM user:
+  - Create a new IAM user (e.g. `prototype-bootstrap-user`) with the inline policy in `bootstrap-user-policy.json`.
+  - Create an access key for that user. Save the secret access key.
+  - Set up the profile locally:
+      ```bash
+      aws configure --profile sandbox-bootstrap
+      ```
+  - Fill in the access key ID and the secret access key.
+
+### Staging / Prod
+
+Use SSO to login. Be sure to set the correct profile.
+
+## Bootstrap Instructions
+
+### Preparation
+
+- Run all commands from `infra/bootstrap`
+- Use the appropriate AWS profile: `export AWS_PROFILE=<admin-user-or-bootstrap-iam-user>`
+- Update the stack YAML file with the appropriate account ID
+
+
+### Set up local backend
+
+Login to a local backend:
+
+```bash
+pulumi login file://.
+```
+
+Initialise the `prototype` stack:
+
+```bash
+pulumi stack init prototype
+```
+
+Input a passphrase when prompted for one. This will be used temporarily for the local backend. After we move to the S3 backend, we will change the secrets provider so that no passphrase will be required.
+
+Provision the resources:
+
+```bash
+pulumi up
+```
+
+Capture the `stateBucketName` for usage later:
+
+```bash
+pulumi stack output stateBucketName
+```
+
+Export the local state:
+
+```bash
+pulumi stack export --file prototype.state.json
+```
+
+In the AWS console, attach the created IAM policy `${appName}-pulumi-state-backend-${envSlug}` to the IAM user used for the bootstrap.
+
+### Set up S3 backend
+
+Login to the remote backend:
+
+```bash
+pulumi login "s3://<stateBucketName>/bootstrap"
+```
+
+Re-initialise the `prototype` stack with AWS KMS as the secrets provider:
+
+```bash
+pulumi stack init prototype --secrets-provider "awskms:///<cmk-arn>"
+```
+
+Import the previously export state file:
+
+```bash
+pulumi stack import --file prototype.state.json
+```
+
+Switch the stack's secrets provider to the AWS KMS key:
+
+```bash
+pulumi stack change-secrets-provider "awskms:///<cmk-arn>"
+```
+
+At this point, you should no longer be prompted for the passphrase.
+
+### Verify migrated backend
+
+```bash
+pulumi stack ls
+AWS_PROFILE=sandbox-bootstrap pulumi preview   # expect "no changes" and no passphrase prompt
+```
+
+### Cleanup
+
+Delete the following:
+
+- Exported state file `prototype.state.json`. This has already been imported to S3.
+- The `.pulumi` folder
+
+### For app infra
+The app's infra can login to the backend as such:
+
+```bash
+pulumi login s3://<stateBucketName>/prototype
+```
+
+Note the folder name is `/prototype`. This is deliberately separate from the bootstrap project's stack.

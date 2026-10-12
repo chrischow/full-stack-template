@@ -202,7 +202,7 @@ export = async () => {
             {
               Sid: 'KmsAccess',
               Effect: 'Allow',
-              Action: ['kms:Decrypt', 'kms:GenerateDataKey', 'kms:DescribeKey'],
+              Action: ['kms:Encrypt', 'kms:Decrypt', 'kms:GenerateDataKey', 'kms:DescribeKey'],
               Resource: keyArn,
             },
           ],
