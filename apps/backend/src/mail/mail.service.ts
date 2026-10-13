@@ -16,8 +16,8 @@ export class MailService {
       region: env.AWS_REGION,
       endpoint: env.AWS_SES_ENDPOINT,
       credentials: {
-        accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: env.SES_ACCESS_KEY_ID,
+        secretAccessKey: env.SES_SECRET_ACCESS_KEY,
       },
     })
 
