@@ -8,3 +8,4 @@ allowBuilds:
   prisma: true
   unrs-resolver: true
   protobufjs: false
+  esbuild: true
