@@ -35,8 +35,8 @@ export const EnvSchema = z.object({
 
   // AWS
   AWS_REGION: z.string().default('ap-southeast-1'),
-  AWS_ACCESS_KEY_ID: z.string(),
-  AWS_SECRET_ACCESS_KEY: z.string(),
+  SES_ACCESS_KEY_ID: z.string(),
+  SES_SECRET_ACCESS_KEY: z.string(),
   AWS_SES_ENDPOINT: z.string(),
 
   // Passkey
