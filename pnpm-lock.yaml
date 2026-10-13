@@ -568,7 +568,7 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3
 
-  infra/prototype:
+  infra/prototype-serverless:
     dependencies:
       '@pulumi/pulumi':
         specifier: ^3.113.0

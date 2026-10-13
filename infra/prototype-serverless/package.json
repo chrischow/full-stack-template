@@ -1,5 +1,5 @@
 {
-  "name": "@infra/prototype",
+  "name": "@infra/prototype-serverless",
   "main": "index.ts",
   "scripts": {
     "check-types": "tsc --noEmit",
