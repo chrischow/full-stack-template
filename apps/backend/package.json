@@ -7,11 +7,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "bundle": "node esbuild.mjs",
     "start": "node dist/main",
     "dev": "nest start --watch | pnpm pino-pretty",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" \"*.mjs\"",
     "format": "prettier --write \"**/*.{ts,js}\"",
     "check-types": "tsc --noEmit",
     "test": "jest",

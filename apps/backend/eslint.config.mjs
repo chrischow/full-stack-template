@@ -8,7 +8,13 @@ export default defineConfig([
   ...baseConfig,
 
   {
-    files: ['**/*.{ts,js}'],
+    files: ['**/*.mjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
+    files: ['**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
