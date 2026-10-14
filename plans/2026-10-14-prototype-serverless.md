@@ -27,7 +27,7 @@ Leave `Dockerfile` intact and add root `Dockerfile.lambda`, reusing its build/pa
 
 **After EACH STEP, code quality checks should be run, and changes should be committed.** Include updates to this plan (for example, marking the step complete) in that step's commit. Use `pnpm lint:fix`, `pnpm format:fix`, and `pnpm check-types` after every code change.
 
-- [ ] Record scope boundaries and prerequisites: app-owned runtime secret retrieval and SES-name mapping must land before live app verification; no WAF, custom DNS/ACM, or release/rollback automation. Document deferred Lambda-viability validation.
+- [x] Record scope boundaries and prerequisites: app-owned runtime secret retrieval and SES-name mapping must land before live app verification; no WAF, custom DNS/ACM, or release/rollback automation. Document deferred Lambda-viability validation.
 - [ ] Add and validate `Dockerfile.lambda` with the Web Adapter; align `APP_PORT` and `AWS_LWA_PORT`, preserve bundled frontend assets and existing container behavior.
 - [ ] Add the ECR repository, Pulumi AWS dependency, prototype stack/account/region safeguards, and no-image bootstrap mode. Export ECR repository URL so the operator can push an immutable tagged image.
 - [ ] Resolve `imageTag` to an existing ECR digest, then configure Lambda image, execution IAM, region/runtime settings, and only the scoped secret-read/decrypt permissions required by the separate application retrieval effort (no Pulumi-managed secret values). If using a version/alias, manage both solely with Pulumi and attach the IAM-authenticated Function URL to the alias.
