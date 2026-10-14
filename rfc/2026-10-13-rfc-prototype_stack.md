@@ -3,7 +3,7 @@
 - **Status:** Draft for review
 - **Date:** 2026-10-13
 - **Related RFC:** [Pulumi IaC with self-managed state](2026-10-06-rfc-pulumi-iac-self-managed-state.md)
-- **Recommended app-serving:** Lambda ZIP + Lambda Web Adapter, with NestJS serving the API and SPA behind CloudFront + AWS WAF.
+- **Provisional app-serving candidate:** Lambda container image + Lambda Web Adapter, with NestJS serving the API and SPA behind CloudFront + AWS WAF; this approach is not yet validated against the application or release requirements.
 - **Recommended database:** Neon PostgreSQL in Singapore, subject to provider/security approval.
 - **App-serving fallback:** ECS Express Mode with ALB + AWS WAF.
 - **Database fallback:** Aurora PostgreSQL-Compatible Serverless v2 with private access and SSM troubleshooting.
@@ -50,7 +50,7 @@ The proposed Singapore restriction is interpreted as **allowing application requ
 ### Non-functional requirements
 
 - **Release frequency:** support 10–20 successful deployments per day without routine infrastructure replacement or user downtime caused by intentional stop/start deployment.
-- **Release speed:** target under one minute from push to a usable release for ordinary, backward-compatible application changes. Measure CI scheduling, required checks, builds, upload, version publication, alias activation, and public availability—not just artifact deployment. Initial provisioning, infrastructure changes, and substantial database migrations are separate workflows. This target requires benchmarking; it is not a vendor guarantee.
+- **Release speed:** target within four minutes from push to a usable release for ordinary, backward-compatible application changes. Measure CI scheduling, required checks, builds, upload, version publication, alias activation, and public availability—not just artifact deployment. Initial provisioning, infrastructure changes, and substantial database migrations are separate workflows. This target requires benchmarking; it is not a vendor guarantee.
 - **Recovery:** proposed target of restoring the previous application artifact within 10 minutes when schemas remain backward compatible. Database recovery is a separate procedure, not covered by this target.
 - **Troubleshooting:** after one-time access setup, a developer should normally obtain authorized read-only SQL access within five minutes.
 - **Durability:** no destructive database synchronization or reset against onboarded-user data; backups and restore validation are mandatory.
@@ -74,8 +74,8 @@ The proposed Singapore restriction is interpreted as **allowing application requ
 | --- | --- | --- | --- | --- |
 | ECS Express Mode | Strong: existing container; WAF attaches to its ALB | Running tasks and generated ingress have a floor | Managed ECS rollout | Less assembly, with a narrower customization surface |
 | Conventional ECS/Fargate + ALB | Strong: existing container | Tasks, ALB, and networking have a floor | Explicit health-gated rolling deployments and circuit breaker | More IaC, predictable ingress/security ownership |
-| Lambda Web Adapter + CloudFront | esbuild ZIP containing NestJS and the React build | Request-based compute; edge, logs, secrets, and DB still cost | Version/alias rollback of the combined application package | Low idle compute versus cold starts and runtime/routing complexity |
-| Lambda + API Gateway + CloudFront | Same ZIP and NestJS static serving | Request-based compute plus gateway charges | Lambda version/alias release controls | API-oriented gateway adds cost/configuration but avoids some Function URL auth coupling |
+| Lambda Web Adapter + CloudFront | Candidate Lambda container image containing NestJS and the React build; application compatibility and release path are unvalidated | Request-based compute; edge, logs, secrets, and DB still cost | Potential version/alias rollback of the application image; release path requires validation | Low idle compute versus cold starts and runtime/routing complexity |
+| Lambda + API Gateway + CloudFront | Same candidate Lambda container image and NestJS static serving; unvalidated | Request-based compute plus gateway charges | Lambda version/alias release controls; image update path requires validation | API-oriented gateway adds cost/configuration but avoids some Function URL auth coupling |
 | Managed container host, e.g. Render/Railway | Usually strong | Vendor/plan-dependent | Convenient deploy and rollback workflows | Additional vendor, region and geo-control requirements |
 | Lightsail/EC2 VM + reverse proxy | Strong | Predictable instance floor | Team implements safe rollout and recovery | Low resource complexity, high patching and operations responsibility |
 
@@ -120,7 +120,7 @@ Pulumi owns the ECS service, task definition, ALB, target group, web ACL, securi
 
 #### Option C: Lambda Web Adapter with CloudFront and a Function URL
 
-Bundle the NestJS application with esbuild and package it with the React build and startup wrapper in a Lambda ZIP—no container image. Lambda Web Adapter translates Lambda HTTP invocations to the Node HTTP server. NestJS serves both the API and all SPA/static files from this package; CloudFront uses the same Lambda origin for every behavior. There is no S3 static-content origin.
+The candidate approach is to package the NestJS application, React build, and startup wrapper in a Lambda container image, with Lambda Web Adapter translating Lambda HTTP invocations to the Node HTTP server. NestJS would serve both the API and SPA/static files from the image; CloudFront would use the same Lambda origin for every behavior. There is no S3 static-content origin. This Lambda container-image approach has not yet been validated against the application's runtime, build, deployment, or release requirements.
 
 **Pros**
 
@@ -135,14 +135,14 @@ Bundle the NestJS application with esbuild and package it with the React build a
 - Lambda concurrency can multiply both Prisma and cache/session connections. Pooling, explicit pool sizes, and concurrency limits are required.
 - HTTP payload, duration, streaming, and background execution constraints need application-specific validation. API Gateway and Function URLs have different constraints.
 - Static cache misses invoke Lambda and may encounter cold starts. Validate that static requests do not unnecessarily perform session/cache database work.
-- esbuild compatibility with NestJS decorators/reflection, runtime dependencies, static-file paths, secret initialization, and origin authentication requires validation. Keep dependencies or generated artifacts that cannot safely be bundled in the ZIP.
+- Lambda container-image compatibility with the application's NestJS decorators/reflection, runtime dependencies, static-file paths, secret initialization, and origin authentication requires validation. Validate the image build and deployment path, runtime architecture and configuration, and image size. Do not assume the existing container can be deployed to Lambda unchanged.
 
-**ZIP packaging and runtime secrets**
+**Container-image packaging and runtime secrets**
 
-- Bundle the backend with esbuild, include the frontend build at the path NestJS expects, and upload the combined ZIP as an immutable Lambda version. Use the Web Adapter layer and a secrets bootstrap layer/wrapper; do not build a container for this option.
+- Build a Lambda-compatible container image containing the backend and frontend build at the paths NestJS expects, then publish it to ECR and deploy it to Lambda. Validate the image build, Lambda configuration, Web Adapter integration, and immutable version/alias release flow before selecting this option. The image-based approach is not yet validated for this application.
 - A Node startup wrapper retrieves runtime secrets, assigns the required values to `process.env`, and only then loads and starts NestJS. This supplies database configuration before clients are constructed. Avoid eager imports that initialize the application before the wrapper sets the environment.
 - The wrapper can retrieve secrets through the AWS SDK using the execution role during startup. AWS's Parameters and Secrets Lambda Extension does not itself inject environment variables; if used, its retrieval endpoint must be available at the point the wrapper calls it. Invocation-only retrieval must not become a bootstrap dependency.
-- Define cached-secret refresh/rotation behavior for warm environments. Never include secret values in the ZIP, logs, or plaintext infrastructure state.
+- Define cached-secret refresh/rotation behavior for warm environments. Never include secret values in the image, logs, or plaintext infrastructure state.
 
 **CloudFront routing**
 
@@ -157,15 +157,15 @@ CloudFront selects cache behavior, not a separate static origin. Let NestJS hand
 
 Use an IAM-authenticated Function URL with CloudFront OAC and a resource policy scoped to the distribution to prevent direct-origin bypass. Verify the current invocation permissions and signed request-body requirements, especially POST/PUT and upload handling. OAC origin signing can conflict with viewer `Authorization`; existing cookie sessions may fit, but bearer-token APIs need a deliberate forwarding/auth design. Do not simply disable origin signing to preserve a bearer header. Avoid forwarding the viewer `Host` to the Function URL; separately validate forwarded host/protocol handling and secure cookies.
 
-Publish the combined ZIP as an immutable Lambda version and shift the serving alias once AWS reports the update ready. Developers validate the release at the main endpoint after cutover; there is no separate candidate-navigation or pre-promotion smoke-test gate. Rollback moves the alias to the previous compatible package. Point CloudFront at a Function URL associated with the stable serving alias: moving the alias does not change the origin URL or require CloudFront configuration propagation.
+For the candidate image-based approach, publish an immutable Lambda version from the image and shift the serving alias only after the image update is ready. Validate this update and promotion sequence before relying on it for releases. Developers validate the release at the main endpoint after cutover; there is no separate candidate-navigation or pre-promotion smoke-test gate. Rollback would move the alias to the previous compatible version. Point CloudFront at a Function URL associated with the stable serving alias: moving the alias does not change the origin URL or require CloudFront configuration propagation.
 
 Disable HTML caching initially and cache fingerprinted assets immutably, avoiding invalidation as a required release step. Retain previous release assets within the serving package for an agreed compatibility window so already-loaded browsers can fetch older lazy-loaded chunks after a rollout; cached copies alone do not guarantee availability. Keep API contracts backward compatible for those clients.
 
-**Disposition:** recommended app-serving option because a narrowly scoped ZIP-and-alias release path and smaller infrastructure footprint best align with the prototype's sub-minute release target. Benchmark actual build/deployment time and cold/warm request latency; fast activation does not guarantee a fast first request. Use ECS Express Mode if Lambda fails application compatibility or runtime requirements.
+**Disposition:** ZIP packaging is not a maintainable app-serving approach for this template. The measured ZIP contained 248,725,123 extracted bytes, leaving only 1,274,877 bytes below the nominal 250,000,000-byte function-plus-layers limit before adding the required Lambda Web Adapter layer; it also leaves inadequate headroom for dependency growth. Do not pursue ZIP packaging or further ad hoc pruning. A Lambda container image is an unvalidated app-serving candidate: do not treat its build, deployment, or alias-release path as established for this application. Validate application compatibility, release time, and cold/warm request latency before selecting it for the prototype. Use ECS Express Mode with ALB + AWS WAF as the app-serving fallback if Lambda compatibility, release requirements, or measured runtime behavior are unsuitable.
 
 #### Option D: Lambda with API Gateway
 
-API Gateway can provide a clearer API front door, authorizers, and explicit API policy than Function URL/OAC authentication. It retains Lambda cold-start, ZIP packaging, secret-bootstrap, and connection concerns while adding a gateway service and request charges. NestJS still serves static files from the same package; there is no separate static origin or release.
+API Gateway can provide a clearer API front door, authorizers, and explicit API policy than Function URL/OAC authentication. It retains Lambda cold-start, unvalidated container-image packaging, secret-bootstrap, and connection concerns while adding a gateway service and request charges. Under this candidate design, NestJS would still serve static files from the same image; there is no separate static origin or release. Validate the image and release path before selecting this option.
 
 HTTP API and REST API have different features, quotas, and WAF integration; select explicitly rather than assuming interchangeable support. If CloudFront enforces geography, the gateway's own public endpoint must not offer a bypass. Evaluate gateway resource/access controls and origin verification before selection.
 
@@ -262,19 +262,17 @@ Provisioned Aurora is worth revisiting for sustained demand or specific Aurora f
 
 #### Decision and rationale
 
-Adopt **hosting Option C: Lambda Web Adapter with CloudFront and a stable alias-backed Function URL**.
+Treat **hosting Option C: Lambda Web Adapter with CloudFront and a stable alias-backed Function URL** as an unvalidated candidate, not as an adopted serving architecture.
 
-It best aligns with the prototype's requirements because it avoids an ECS service/ALB footprint and provides a narrowly scoped ZIP-and-alias release path for the sub-minute push-to-usable-release target. NestJS still serves the API and React SPA together; the esbuild ZIP includes the frontend build and runtime-secret wrapper. This is a measured target, not an assumption that all Lambda releases finish within a minute.
+The candidate would use a Lambda container image containing NestJS and the React SPA, with a runtime-secret wrapper. Its application compatibility, image build and deployment path, release time, and fit with the four-minute push-to-usable-release target have not been validated. Measure these before selecting Lambda; do not assume that image-based releases meet the target.
 
-Accept packaging/initialization work, cold-start latency, and explicit concurrency/connection management in exchange for request-based compute and less application-serving infrastructure. Use **ECS Express Mode with ALB + AWS WAF** if compatibility or measured runtime behavior makes Lambda unsuitable. Conventional ECS remains an additional customization alternative, not the selected fallback.
+If validation demonstrates that Lambda is suitable, it may offer request-based compute and less application-serving infrastructure, in exchange for packaging/initialization work, cold-start latency, and explicit concurrency/connection management. Use **ECS Express Mode with ALB + AWS WAF** as the app-serving fallback if Lambda is unsuitable or fails validation. Conventional ECS remains an additional customization alternative, not the selected fallback.
 
 #### Request path and ingress protection
 
-The baseline request path is:
+**Candidate Lambda request path:** Singapore client → CloudFront with AWS WAF → IAM-authenticated Function URL for the serving alias → Lambda Web Adapter/NestJS → Neon PostgreSQL over TLS. Validate this path before adoption.
 
-**Singapore client → CloudFront with AWS WAF → IAM-authenticated Function URL for the serving alias → Lambda Web Adapter/NestJS → Neon PostgreSQL over TLS.**
-
-NestJS serves the API, static assets, and SPA deep links from one ZIP; there is no S3 static-content origin. Configure `/api` and `/api/*` as uncached, forwarding required cookies, query strings, and application auth. Disable HTML caching initially. Cache only suitable fingerprinted assets immutably; never cache personalized responses or session cookies. Preserve missing-asset/API errors rather than broadly returning HTML.
+If the Lambda container-image candidate is selected after validation, NestJS would serve the API, static assets, and SPA deep links from the image; there would be no S3 static-content origin. Configure `/api` and `/api/*` as uncached, forwarding required cookies, query strings, and application auth. Disable HTML caching initially. Cache only suitable fingerprinted assets immutably; never cache personalized responses or session cookies. Preserve missing-asset/API errors rather than broadly returning HTML.
 
 Use CloudFront OAC and Lambda resource permissions scoped to the distribution so the Function URL cannot bypass the protected edge. Verify actual auth flows, signed mutation request bodies, forwarded host/protocol handling, and secure cookies as described in Option C. Use a stable hostname with ACM TLS.
 
@@ -296,7 +294,7 @@ Record a complete monthly estimate covering Lambda, CloudFront, WAF, database pl
 
 #### Provisioning versus application-release ownership
 
-Pulumi owns infrastructure and runtime configuration: IAM, layers, secret references, monitoring, CloudFront/WAF, the Function URL, and initial function/alias setup. A maintained CI release script using the AWS CLI or SDK owns application code updates, immutable version publication, serving-alias promotion, and rollback.
+Pulumi owns infrastructure and runtime configuration: IAM, any required Lambda image configuration, secret references, monitoring, CloudFront/WAF, the Function URL, and initial function/alias setup. If the Lambda container-image candidate is validated and selected, a maintained CI release script using the AWS CLI or SDK would own image publication, application updates, immutable version publication, serving-alias promotion, and rollback. Validate this division of ownership before adopting the candidate.
 
 Pulumi itself does not cause CloudFront propagation: changing distribution configuration does. An unchanged distribution need not be updated during `pulumi up`. Nevertheless, routine releases use the narrowly scoped CI path rather than full infrastructure reconciliation to minimize work and latency.
 
@@ -304,11 +302,11 @@ Explicitly delegate the function's deployed code and the alias's target version 
 
 #### Release pipeline
 
-1. On push, run required quality checks, build React, bundle NestJS with esbuild, and package the frontend, dependencies/artifacts, and startup wrapper in one ZIP. Cache dependencies/build work and identify the artifact by commit. Measure runner scheduling and checks as part of the sub-minute target.
+1. On push, run required quality checks and build React and NestJS. For the unvalidated Lambda candidate, build a Lambda-compatible container image containing the frontend, backend, required dependencies/artifacts, and startup wrapper; publish and identify the image by commit. Validate this build and deployment path before adopting it. Cache dependencies/build work and measure runner scheduling and checks as part of the four-minute target.
 2. Serialize releases to the shared prototype. Superseded unstarted jobs may be cancelled; never cancel a job mid-migration or promotion.
-3. Rehearse migrations on a disposable database branch when feasible. Run versioned migrations once with a direct connection and scoped migration identity—not on each Lambda startup. Resolve separate migration/runtime configuration during implementation. Substantial migrations use a separate release window outside the sub-minute target.
+3. Rehearse migrations on a disposable database branch when feasible. Run versioned migrations once with a direct connection and scoped migration identity—not on each Lambda startup. Resolve separate migration/runtime configuration during implementation. Substantial migrations use a separate release window outside the four-minute target.
 4. Use expand/contract schemas compatible with old/new versions and already-loaded browsers. Approve destructive contraction in a later release.
-5. Upload the ZIP, wait for AWS update readiness, publish an immutable version, and shift the stable serving alias. Record the previous version before promotion. Do not require candidate navigation or a pre-promotion smoke test: developers access the main endpoint after cutover.
+5. For the Lambda container-image candidate, publish the image, wait for AWS update readiness, publish an immutable version, and shift the stable serving alias. Validate this release sequence before adopting it. Record the previous version before promotion. Do not require candidate navigation or a pre-promotion smoke test: developers access the main endpoint after cutover.
 6. Verify public availability and perform post-release checks at the main endpoint: SPA routes/assets, API, onboarding/login, sessions, and a DB round trip. These do not gate the alias shift; manual functional navigation follows promotion. If the release fails, move the alias back to the previous compatible version.
 7. Keep the alias-backed origin URL and CloudFront configuration unchanged. HTML is uncached; fingerprinted assets remain immutable. Retain prior assets for the browser compatibility window rather than relying on cache presence. No required distribution update or invalidation sits on the ordinary release path.
 8. Retain known-good versions and release metadata. Never automatically reverse migrations or reset user data on application rollback. Prefer a forward schema fix; use the tested database restore procedure only for a data incident.
@@ -338,13 +336,13 @@ Accept an external database dependency and plan-dependent security/recovery feat
 
 ### Secrets and observability
 
-Store runtime secrets in AWS Secrets Manager or an approved equivalent. The Node startup wrapper retrieves secrets and sets `process.env` before loading NestJS, as described in Option C. Define refresh/rotation behavior for warm environments. Use Pulumi secret references/config appropriately and ensure infrastructure outputs, ZIPs, and CI logs do not expose plaintext values. Runtime IAM should grant access only to necessary secrets.
+Store runtime secrets in AWS Secrets Manager or an approved equivalent. If the Lambda container-image candidate is selected, the Node startup wrapper retrieves secrets and sets `process.env` before loading NestJS, as described in Option C; validate that initialization sequence. Define refresh/rotation behavior for warm environments. Use Pulumi secret references/config appropriately and ensure infrastructure outputs, images, and CI logs do not expose plaintext values. Runtime IAM should grant access only to necessary secrets.
 
 Emit structured logs with request identifiers and release digests; redact passwords, session tokens, and sensitive user data. Set log retention and alerts for elevated errors, failed deployment health, DB connection exhaustion, and storage/capacity pressure. Track rollout duration, first-request latency after DB idle, query latency, and restore drill results.
 
 ### Validation before implementation commitment
 
-- Confirm real-app Lambda compatibility: esbuild metadata/dependencies, startup secrets, static paths, SPA deep links, sessions/auth, Function URL/OAC mutation handling, pooling, and any persistent-connection/background-work requirements.
+- Treat Lambda container-image serving as unvalidated until confirmed with the real application. Test the image build and deployment path, NestJS startup and dependencies, startup secrets, static paths, SPA deep links, sessions/auth, Function URL/OAC mutation handling, pooling, and any persistent-connection/background-work requirements. If Lambda is unsuitable or fails the release/runtime requirements, use ECS Express Mode with ALB + AWS WAF as the fallback.
 - Exercise 20 representative releases with cached and uncached builds. Measure push-to-public-availability including scheduling/checks/build/upload/publication/alias shift, plus cold/warm latency and DB-resume latency. Record the ordinary release envelope separately from provisioning and substantial migrations.
 - Test broken startup/migration cases and post-promotion validation/alias rollback at the main endpoint. Do not introduce a separate candidate-navigation gate.
 - Verify CloudFront/WAF protection and direct Function URL rejection, uncached HTML, safe asset caching, and no routine distribution change/invalidation requirement.
@@ -357,8 +355,8 @@ Emit structured logs with request identifiers and release digests; redact passwo
 1. What monthly budget and initial user/concurrency envelope should govern sizing?
 2. Is external PostgreSQL approved, and does Singapore mean IP-geolocation filtering or a stricter processing/residency requirement?
 3. What RPO, RTO, and acceptable first-request latency apply after users onboard?
-4. Which payloads, auth schemes, background jobs, or persistent connections must the Lambda compatibility trial cover?
-5. What measured build/check duration and CI runner scheduling allow the sub-minute release target, including uncached runs?
+4. Which payloads, auth schemes, background jobs, persistent connections, image-build/deployment cases, and release scenarios must the unvalidated Lambda container-image compatibility trial cover before deciding whether to adopt Lambda or use ECS Express Mode?
+5. What measured build/check duration and CI runner scheduling allow the four-minute release target, including uncached runs?
 6. Which domain and auth callback/passkey origins will be used?
 
 ### References and verification status
