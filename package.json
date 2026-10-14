@@ -6,6 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "turbo build",
+    "bundle": "bash scripts/bundle-lambda.sh",
     "dev": "turbo dev",
     "dev:infra:start": "docker-compose up -d --wait",
     "dev:infra:stop": "docker-compose stop",
