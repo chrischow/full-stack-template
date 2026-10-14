@@ -24,8 +24,8 @@ RUN turbo build --filter=backend --filter=frontend
 RUN rm -rf prod-backend && pnpm --filter=backend --prod deploy --ignore-scripts prod-backend
 
 # ---- STAGE 4: LAMBDA WEB ADAPTER RUNTIME ----
-FROM public.ecr.aws/lambda/nodejs:22 AS runtime
-WORKDIR ${LAMBDA_TASK_ROOT}
+FROM public.ecr.aws/docker/library/node:22-trixie-slim AS runtime
+WORKDIR /usr/src/app
 
 # Pin the Lambda Web Adapter to the official 1.1.0 release used in its quick start.
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 /lambda-adapter /opt/extensions/lambda-adapter
@@ -39,4 +39,4 @@ COPY --from=builder /usr/src/app/prod-backend/node_modules ./apps/backend/node_m
 COPY --from=builder /usr/src/app/apps/backend/package.json ./apps/backend/package.json
 COPY --from=builder /usr/src/app/apps/frontend/dist ./apps/frontend/dist
 
-CMD ["apps/backend/dist/main.js"]
+CMD ["node", "apps/backend/dist/main.js"]
