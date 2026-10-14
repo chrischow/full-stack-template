@@ -114,11 +114,86 @@ async function main() {
     authorizationType: 'AWS_IAM',
   })
 
+  const originId = 'lambda-function-url'
+  const originAccessControl = new aws.cloudfront.OriginAccessControl('prototype-serverless-oac', {
+    name: `${appName}-prototype-serverless-oac`,
+    originAccessControlOriginType: 'lambda',
+    signingBehavior: 'always',
+    signingProtocol: 'sigv4',
+  })
+
+  // Keep HTML, API and assets uncached until the emitted asset names and missing-file
+  // responses are verified. Forward session cookies and OAuth callback query strings.
+  const originRequestPolicy = new aws.cloudfront.OriginRequestPolicy('prototype-serverless-origin-request', {
+    name: `${appName}-prototype-serverless-origin-request`,
+    cookiesConfig: { cookieBehavior: 'all' },
+    queryStringsConfig: { queryStringBehavior: 'all' },
+    headersConfig: {
+      headerBehavior: 'whitelist',
+      headers: { items: ['Accept', 'Content-Type'] },
+    },
+  })
+
+  const uncachedBehavior = {
+    targetOriginId: originId,
+    viewerProtocolPolicy: 'redirect-to-https' as const,
+    allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
+    cachedMethods: ['GET', 'HEAD'],
+    cachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad', // AWS managed CachingDisabled
+    originRequestPolicyId: originRequestPolicy.id,
+    compress: true,
+  }
+
+  const distribution = new aws.cloudfront.Distribution('prototype-serverless-distribution', {
+    enabled: true,
+    origins: [
+      {
+        originId,
+        domainName: functionUrl.functionUrl.apply((url) => new URL(url).hostname),
+        originAccessControlId: originAccessControl.id,
+        customOriginConfig: {
+          httpPort: 80,
+          httpsPort: 443,
+          originProtocolPolicy: 'https-only',
+          originSslProtocols: ['TLSv1.2'],
+        },
+      },
+    ],
+    defaultCacheBehavior: uncachedBehavior,
+    orderedCacheBehaviors: [
+      { ...uncachedBehavior, pathPattern: '/api' },
+      { ...uncachedBehavior, pathPattern: '/api/*' },
+    ],
+    restrictions: {
+      geoRestriction: { restrictionType: 'whitelist', locations: ['SG'] },
+    },
+    viewerCertificate: { cloudfrontDefaultCertificate: true },
+  })
+
+  new aws.lambda.Permission('prototype-serverless-cloudfront-url', {
+    action: 'lambda:InvokeFunctionUrl',
+    function: lambda.name,
+    qualifier: alias.name,
+    principal: 'cloudfront.amazonaws.com',
+    sourceArn: distribution.arn,
+    functionUrlAuthType: 'AWS_IAM',
+  })
+
+  new aws.lambda.Permission('prototype-serverless-cloudfront-invoke', {
+    action: 'lambda:InvokeFunction',
+    function: lambda.name,
+    qualifier: alias.name,
+    principal: 'cloudfront.amazonaws.com',
+    sourceArn: distribution.arn,
+    invokedViaFunctionUrl: true,
+  })
+
   return {
     repositoryUrl: repository.repositoryUrl,
     repositoryArn: repository.arn,
     imageDigest: image.imageDigest,
     functionUrl: functionUrl.functionUrl,
+    distributionDomain: distribution.domainName,
   }
 }
 
@@ -127,3 +202,6 @@ export const repositoryUrl = outputs.then((result) => result.repositoryUrl)
 export const repositoryArn = outputs.then((result) => result.repositoryArn)
 export const imageDigest = outputs.then((result) => ('imageDigest' in result ? result.imageDigest : undefined))
 export const functionUrl = outputs.then((result) => ('functionUrl' in result ? result.functionUrl : undefined))
+export const distributionDomain = outputs.then((result) =>
+  'distributionDomain' in result ? result.distributionDomain : undefined,
+)

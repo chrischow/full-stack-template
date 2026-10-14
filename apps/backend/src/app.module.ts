@@ -78,7 +78,7 @@ const FRONTEND_PATH = resolve(__dirname, '..', '..', '..', 'apps', 'frontend', '
     }),
     ServeStaticModule.forRoot({
       rootPath: FRONTEND_PATH,
-      exclude: ['/api/{*path}'],
+      exclude: ['/api/{*path}', '/assets/{*path}'],
       serveStaticOptions: {
         maxAge: 2 * 60 * 60 * 1000,
         setHeaders: (res: Response, path: string) => {
