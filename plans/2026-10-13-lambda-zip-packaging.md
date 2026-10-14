@@ -1,5 +1,7 @@
 # Plan: package the NestJS API and React SPA for AWS Lambda ZIP
 
+> **Experiment outcome:** The ZIP was built, but this approach is not recommended for the growing template. See [ZIP feasibility findings](#zip-feasibility-findings) below. The remaining unchecked steps are historical plans, not a recommendation to pursue ZIP deployment.
+
 ## Context
 
 - `apps/backend/src/app.module.ts` serves `apps/frontend/dist` from a path relative to the compiled backend. Keep the API and SPA together in the ZIP at the expected relative paths.
@@ -48,3 +50,17 @@ After **each completed change step**, run `lint:fix`, `format:fix`, and `check-t
 - Run `lint:fix`, `format:fix`, and `check-types` after implementation changes. Produce and inspect a clean ZIP with the backend, executable root `run.sh`, and frontend at their expected relative paths and all required Linux `x86_64` runtime assets. Verify no dotenv files, credentials, or unrelated workspace files are included.
 - Verify that the env schema, mail service, and development env file use `SES_ACCESS_KEY_ID` and `SES_SECRET_ACCESS_KEY`, while the existing SSM/Pulumi parameter names remain untouched. Verify that the documented LWA layer architecture, handler, execution wrapper, and port match the package and unchanged server. A ZIP-content check alone cannot prove startup: the existing backend still requires configuration during import, and the function/layer/environment are supplied by deployment.
 - After the separate backend SSM/runtime integration and deployment, the user can test startup, DB/session behavior, `/`, a React deep link, a static asset, and `/api/v1/...` on the target Lambda runtime, plus cold-start timing and artifact/layer size.
+
+## ZIP feasibility findings
+
+The packaging experiment produced these locally measured results (the sizes are artifact measurements, not evidence of a successful Lambda deployment):
+
+| Packaging state | ZIP size | Uncompressed ZIP contents | Finding |
+| --- | --- | --- | --- |
+| Initial production deploy | 302 MB (reported) | Not measured | The staged `node_modules` occupied about 1.1 GB. Prisma CLI, Studio, development tooling, and duplicate Prisma client peer contexts contributed to the dependency tree. |
+| Deploy with `--no-optional` | 128 MB (reported) | Not measured | Omitting optional dependencies removed substantial bulk, but requires runtime testing to ensure no required optional integration was lost. |
+| After aligning backend TypeScript with the workspace and regenerating `pnpm-lock.yaml` | 81,536,073 bytes | 248,725,123 bytes across 42,123 ZIP entries | The duplicate Prisma client peer context was removed; one large client/runtime installation remains necessary. |
+
+The final ZIP is above Lambda's 50 MB direct-upload limit, so it would require an S3-backed upload. More importantly, its extracted contents are already extremely close to Lambda's 250 MB limit **for the function and all attached layers combined**. Against a nominal 250,000,000-byte threshold, only 1,274,877 bytes remain *before* attaching the required Lambda Web Adapter (LWA) layer. AWS's MB interpretation and the layer's extracted size must be checked for an actual deployment, but neither S3 upload nor moving files into a layer increases that aggregate limit. Even if this particular ZIP and layer could be made to fit, normal dependency growth could exceed it.
+
+The ZIP therefore demonstrates that packaging is technically possible, **not that it is a maintainable deployment strategy for this template**. Do not rely on further ad hoc pruning of Prisma's dynamically loaded client/runtime files to manufacture headroom. Prefer a separate Lambda container-image experiment: adapt the existing `Dockerfile` to include a Lambda-compatible HTTP bridge such as LWA, push the image to ECR, and create an image-based Lambda function. Validate startup, frontend and API routes, Prisma/database access, and configuration on Lambda. This is a new deployment approach, not completion of the remaining ZIP steps above.
