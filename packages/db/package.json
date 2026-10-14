@@ -5,6 +5,7 @@
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint .",

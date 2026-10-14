@@ -5,6 +5,7 @@
   "main": "./dist/contracts/index.js",
   "types": "./dist/contracts/index.d.ts",
   "type": "module",
+  "files": ["dist"],
   "exports": {
     ".": {
       "types": "./dist/contracts/index.d.ts",
