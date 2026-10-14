@@ -1,4 +1,5 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import {
   EmailLoginInputs,
   OtpResponse,
@@ -11,7 +12,7 @@ import crypto from 'crypto'
 import { addSeconds, isAfter } from 'date-fns'
 
 import { AppCacheService } from '@/app_cache/app_cache.service'
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 import { MailService } from '@/mail/mail.service'
 import { UserService } from '@/user/user.service'
 
@@ -26,6 +27,7 @@ export class OtpService {
     private readonly appCache: AppCacheService,
     private readonly mailService: MailService,
     private readonly userService: UserService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   generateOtp(): string {
@@ -37,7 +39,7 @@ export class OtpService {
     const action = 'requestOtp'
 
     const now = new Date()
-    let canRequestAfter = addSeconds(now, env.OTP_REQUEST_TIMEOUT_SECONDS)
+    let canRequestAfter = addSeconds(now, this.config.get('OTP_REQUEST_TIMEOUT_SECONDS', { infer: true }))
     const response = OtpResponseSchema.parse({
       canRequestAfter,
     })
@@ -61,14 +63,14 @@ export class OtpService {
       await this.mailService.sendMail({
         from: 'fullstack@template.com',
         to: email,
-        subject: `One-Time Password (OTP) for ${env.APP_NAME}`,
+        subject: `One-Time Password (OTP) for ${this.config.get('APP_NAME', { infer: true })}`,
         html: `<p>Your OTP is <b>${otpValue}</b>. It will expire in 10 minutes.</p>
           <p>If the OTP does not work, please request for a new one.</p>`,
       })
     }
 
     const otpKey = `otp:${user.id}`
-    const otpHash = computeHmac(otpValue)
+    const otpHash = computeHmac(this.config.get('OTP_SECRET', { infer: true }), otpValue)
     const otp = await this.appCache.get({ key: otpKey, schema: OtpSchema, errMsg, action })
 
     // No OTP: Can generate
@@ -76,7 +78,7 @@ export class OtpService {
       await this.appCache.set({
         key: otpKey,
         value: { value: otpHash, retries: 0 },
-        ttl: env.OTP_VALIDITY_SECONDS * 1000,
+        ttl: this.config.get('OTP_VALIDITY_SECONDS', { infer: true }) * 1000,
         errMsg,
         action,
       })
@@ -89,13 +91,16 @@ export class OtpService {
     }
 
     // Can re-request
-    const requestAfter = addSeconds(user.lastRequestedAt ?? now, env.OTP_REQUEST_TIMEOUT_SECONDS)
+    const requestAfter = addSeconds(
+      user.lastRequestedAt ?? now,
+      this.config.get('OTP_REQUEST_TIMEOUT_SECONDS', { infer: true }),
+    )
     const canRequest = isAfter(new Date(), requestAfter)
     if (canRequest) {
       await this.appCache.set({
         key: otpKey,
         value: { value: otpHash, retries: 0 },
-        ttl: env.OTP_VALIDITY_SECONDS * 1000,
+        ttl: this.config.get('OTP_VALIDITY_SECONDS', { infer: true }) * 1000,
         errMsg,
         action,
       })
@@ -143,7 +148,7 @@ export class OtpService {
       })
     }
 
-    if (currentOtp.retries >= env.OTP_MAX_RETRIES) {
+    if (currentOtp.retries >= this.config.get('OTP_MAX_RETRIES', { infer: true })) {
       throw new UnauthorizedException('Too many failed attempts. Please request a new OTP.', {
         cause: {
           action,
@@ -155,7 +160,12 @@ export class OtpService {
       })
     }
 
-    if (!crypto.timingSafeEqual(Buffer.from(currentOtp.value, 'hex'), Buffer.from(computeHmac(otp), 'hex'))) {
+    if (
+      !crypto.timingSafeEqual(
+        Buffer.from(currentOtp.value, 'hex'),
+        Buffer.from(computeHmac(this.config.get('OTP_SECRET', { infer: true }), otp), 'hex'),
+      )
+    ) {
       const remainingTtl = await this.appCache.getRemainingTtl({ key: otpKey, errMsg, action })
 
       if (remainingTtl === 0) {

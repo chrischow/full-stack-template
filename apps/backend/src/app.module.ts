@@ -1,7 +1,7 @@
 import { KeyvPostgres } from '@keyv/postgres'
 import { CacheModule } from '@nestjs/cache-manager'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { REQUEST } from '@nestjs/core'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { onError, ORPCError, ORPCModule } from '@orpc/nest'
@@ -14,9 +14,10 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AppCacheModule } from './app_cache/app_cache.module'
 import { AuthModule } from './auth/auth.module'
-import { env, validate } from './env/schema'
+import { loadEnv } from './env/loader'
+import { Env } from './env/schema'
 import { HealthModule } from './health/health.module'
-import { pinoHttp } from './logger'
+import { createPinoHttp } from './logger'
 import { MailModule } from './mail/mail.module'
 import { HelmetMiddleware } from './middleware/helmet.middleware'
 import { SessionMiddleware } from './middleware/session.middleware'
@@ -29,12 +30,13 @@ const FRONTEND_PATH = resolve(__dirname, '..', '..', '..', 'apps', 'frontend', '
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validate,
+      load: [loadEnv],
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: () => {
-        const postgresUri = `postgresql://${env.DB_USERNAME}:${env.DB_PASSWORD}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => {
+        const postgresUri = `postgresql://${config.get('DB_USERNAME', { infer: true })}:${config.get('DB_PASSWORD', { infer: true })}@${config.get('DB_HOST', { infer: true })}:${config.get('DB_PORT', { infer: true })}/${config.get('DB_NAME', { infer: true })}`
         return {
           stores: [
             new KeyvPostgres({
@@ -42,12 +44,17 @@ const FRONTEND_PATH = resolve(__dirname, '..', '..', '..', 'apps', 'frontend', '
               table: 'app_cache',
             }),
           ],
-          ttl: env.KV_TTL_SECONDS * 1000,
+          ttl: config.get('KV_TTL_SECONDS', { infer: true }) * 1000,
         }
       },
     }),
     HealthModule,
-    LoggerModule.forRoot({ pinoHttp }),
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => ({
+        pinoHttp: createPinoHttp(config.get('NODE_ENV', { infer: true })),
+      }),
+    }),
     ORPCModule.forRootAsync({
       useFactory: (request: Request) => ({
         interceptors: [

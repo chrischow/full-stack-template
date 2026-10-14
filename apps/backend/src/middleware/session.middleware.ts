@@ -1,26 +1,30 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { PrismaSessionStore } from '@quixo3/prisma-session-store'
 import { NextFunction, Request, Response } from 'express'
 import session from 'express-session'
 
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 import { PrismaService } from '@/prisma/prisma.service'
 
 @Injectable()
 export class SessionMiddleware implements NestMiddleware {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService<Env, true>,
+  ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     const sessionMiddleware = session({
       cookie: {
-        maxAge: env.SESSION_COOKIE_MAX_AGE,
+        maxAge: this.config.get('SESSION_COOKIE_MAX_AGE', { infer: true }),
         httpOnly: true,
         signed: true,
-        secure: ['production', 'staging'].includes(env.NODE_ENV),
+        secure: ['production', 'staging'].includes(this.config.get('NODE_ENV', { infer: true })),
         sameSite: 'strict',
       },
-      name: env.SESSION_NAME,
-      secret: env.SESSION_SECRET,
+      name: this.config.get('SESSION_NAME', { infer: true }),
+      secret: this.config.get('SESSION_SECRET', { infer: true }),
       resave: true,
       saveUninitialized: false,
       store: new PrismaSessionStore(this.prisma, {

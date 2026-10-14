@@ -1,22 +1,26 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { SessionUserSchema } from '@repo/api-contract/schemas'
 import { Profile, Strategy, VerifyCallback } from 'passport-openidconnect'
 
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 import { UserService } from '@/user/user.service'
 
 @Injectable()
 export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly userService: UserService,
+    config: ConfigService<Env, true>,
+  ) {
     super({
-      issuer: `${env.OAUTH_BASE_URL}`,
-      authorizationURL: `${env.OAUTH_BASE_URL}/auth`,
-      tokenURL: `${env.OAUTH_BASE_URL}/token`,
-      userInfoURL: `${env.OAUTH_BASE_URL}/userinfo`,
-      clientID: env.OAUTH_CLIENT_ID,
-      clientSecret: env.OAUTH_CLIENT_SECRET,
-      callbackURL: env.OAUTH_CLIENT_CALLBACK_URL,
+      issuer: `${config.get('OAUTH_BASE_URL', { infer: true })}`,
+      authorizationURL: `${config.get('OAUTH_BASE_URL', { infer: true })}/auth`,
+      tokenURL: `${config.get('OAUTH_BASE_URL', { infer: true })}/token`,
+      userInfoURL: `${config.get('OAUTH_BASE_URL', { infer: true })}/userinfo`,
+      clientID: config.get('OAUTH_CLIENT_ID', { infer: true }),
+      clientSecret: config.get('OAUTH_CLIENT_SECRET', { infer: true }),
+      callbackURL: config.get('OAUTH_CLIENT_CALLBACK_URL', { infer: true }),
       skipUserProfile: false,
       scope: ['openid', 'email', 'profile'],
     })

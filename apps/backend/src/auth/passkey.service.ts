@@ -6,6 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import {
   PasskeyAuthenticationInputs,
   PasskeyAuthenticationOptionsSchema,
@@ -26,7 +27,7 @@ import { addDays, isAfter } from 'date-fns'
 import z from 'zod'
 
 import { AppCacheService } from '@/app_cache/app_cache.service'
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 import { PrismaService } from '@/prisma/prisma.service'
 import { UserService } from '@/user/user.service'
 
@@ -38,6 +39,7 @@ export class PasskeyService {
     private readonly appCache: AppCacheService,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   async checkIsUserVerified({ user }: { user: SessionUser }): Promise<void> {
@@ -59,7 +61,10 @@ export class PasskeyService {
 
     if (
       !existingUser.lastVerifiedAt ||
-      isAfter(new Date(), addDays(existingUser.lastVerifiedAt, env.PASSKEY_VERIFICATION_DAYS))
+      isAfter(
+        new Date(),
+        addDays(existingUser.lastVerifiedAt, this.config.get('PASSKEY_VERIFICATION_DAYS', { infer: true })),
+      )
     ) {
       throw new BadRequestException(
         'Cannot use passkeys to log in. Please login again with OTP to verify your account first.',
@@ -95,8 +100,8 @@ export class PasskeyService {
     })
 
     const options = await generateRegistrationOptions({
-      rpName: env.APP_NAME,
-      rpID: env.PASSKEY_RP_ID,
+      rpName: this.config.get('APP_NAME', { infer: true }),
+      rpID: this.config.get('PASSKEY_RP_ID', { infer: true }),
       userName: user.name,
       attestationType: 'none',
       excludeCredentials: passkeys.map((pk) => ({ id: pk.id })),
@@ -120,7 +125,7 @@ export class PasskeyService {
       .set({
         key: `register:${user.id}`,
         value: options,
-        ttl: env.PASSKEY_REGISTER_TIMEOUT_SECONDS * 1000,
+        ttl: this.config.get('PASSKEY_REGISTER_TIMEOUT_SECONDS', { infer: true }) * 1000,
         errMsg,
         action,
       })
@@ -174,8 +179,8 @@ export class PasskeyService {
     const verification = await verifyRegistrationResponse({
       response: credentials,
       expectedChallenge: options.challenge,
-      expectedOrigin: env.PASSKEY_ORIGIN,
-      expectedRPID: env.PASSKEY_RP_ID,
+      expectedOrigin: this.config.get('PASSKEY_ORIGIN', { infer: true }),
+      expectedRPID: this.config.get('PASSKEY_RP_ID', { infer: true }),
     }).catch((error: unknown) => {
       throw new InternalServerErrorException(errMsg, {
         cause: {
@@ -246,7 +251,7 @@ export class PasskeyService {
 
   async generatePasskeyLoginOptions() {
     const options = await generateAuthenticationOptions({
-      rpID: env.PASSKEY_RP_ID,
+      rpID: this.config.get('PASSKEY_RP_ID', { infer: true }),
       allowCredentials: [],
       userVerification: 'preferred',
     })
@@ -256,7 +261,7 @@ export class PasskeyService {
     await this.appCache.set({
       key: `authn:${identifier}`,
       value: options,
-      ttl: env.PASSKEY_AUTHN_TIMEOUT_SECONDS * 1000,
+      ttl: this.config.get('PASSKEY_AUTHN_TIMEOUT_SECONDS', { infer: true }) * 1000,
       errMsg: 'Could not initiate Passkey login.',
       action: 'generatePasskeyLoginOptions',
     })
@@ -336,8 +341,8 @@ export class PasskeyService {
     const verification = await verifyAuthenticationResponse({
       response: credentials,
       expectedChallenge: options.challenge,
-      expectedOrigin: env.PASSKEY_ORIGIN,
-      expectedRPID: env.PASSKEY_RP_ID,
+      expectedOrigin: this.config.get('PASSKEY_ORIGIN', { infer: true }),
+      expectedRPID: this.config.get('PASSKEY_RP_ID', { infer: true }),
       credential: {
         id: passkey.id,
         publicKey: passkey.publicKey,

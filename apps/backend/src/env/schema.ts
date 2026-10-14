@@ -4,8 +4,14 @@ import z from 'zod'
 const nodeEnv = process.env.NODE_ENV || 'development'
 configDotenv({ path: `../../.env.${nodeEnv}` })
 
-export const EnvSchema = z.object({
-  NODE_ENV: z.enum(['local', 'development', 'test', 'staging', 'production']).default('development'),
+export const BootstrapConfigSchema = z.object({
+  CONFIG_SOURCE: z.enum(['environment', 'ssm']),
+  SSM_PARAMETER_PREFIX: z.string().trim().min(1).optional(),
+  NODE_ENV: z.enum(['local', 'development', 'test', 'staging', 'production']),
+  AWS_REGION: z.string().trim().min(1).optional(),
+})
+
+export const ManagedConfigSchema = z.object({
   APP_PORT: z.string().transform(Number).default(8080),
   APP_DOMAIN: z.string().default('http://localhost:3000'),
   APP_NAME: z.string(),
@@ -34,7 +40,6 @@ export const EnvSchema = z.object({
   OTP_SECRET: z.string(),
 
   // AWS
-  AWS_REGION: z.string().default('ap-southeast-1'),
   SES_ACCESS_KEY_ID: z.string(),
   SES_SECRET_ACCESS_KEY: z.string(),
   AWS_SES_ENDPOINT: z.string(),
@@ -47,10 +52,27 @@ export const EnvSchema = z.object({
   PASSKEY_VERIFICATION_DAYS: z.string().transform(Number).default(60),
 })
 
+export const EnvSchema = z
+  .object({ ...BootstrapConfigSchema.shape, ...ManagedConfigSchema.shape })
+  .superRefine((env, ctx) => {
+    if (env.CONFIG_SOURCE === 'ssm') {
+      if (!env.SSM_PARAMETER_PREFIX) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['SSM_PARAMETER_PREFIX'],
+          message: 'SSM_PARAMETER_PREFIX is required when CONFIG_SOURCE is "ssm".',
+        })
+      }
+
+      if (!env.AWS_REGION) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['AWS_REGION'],
+          message: 'AWS_REGION is required when CONFIG_SOURCE is "ssm".',
+        })
+      }
+    }
+  })
+  .transform((env) => ({ ...env, AWS_REGION: env.AWS_REGION ?? 'ap-southeast-1' }))
+
 export type Env = z.infer<typeof EnvSchema>
-
-export const validate = (config: Record<string, unknown>) => {
-  return EnvSchema.parse(config)
-}
-
-export const env = EnvSchema.parse(process.env)

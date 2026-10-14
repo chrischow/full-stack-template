@@ -2,7 +2,6 @@ import * as aws from '@pulumi/aws'
 import * as pulumi from '@pulumi/pulumi'
 
 const parameterNames = [
-  'NODE_ENV',
   'APP_PORT',
   'APP_DOMAIN',
   'APP_NAME',
@@ -23,9 +22,8 @@ const parameterNames = [
   'OTP_VALIDITY_SECONDS',
   'OTP_MAX_RETRIES',
   'OTP_SECRET',
-  'AWS_REGION',
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
+  'SES_ACCESS_KEY_ID',
+  'SES_SECRET_ACCESS_KEY',
   'AWS_SES_ENDPOINT',
   'PASSKEY_RP_ID',
   'PASSKEY_ORIGIN',
@@ -41,7 +39,7 @@ const secureParameterNames = new Set<ParameterName>([
   'SESSION_SECRET',
   'OAUTH_CLIENT_SECRET',
   'OTP_SECRET',
-  'AWS_SECRET_ACCESS_KEY',
+  'SES_SECRET_ACCESS_KEY',
 ])
 
 export = async () => {
@@ -50,7 +48,6 @@ export = async () => {
   const expectedAccountId = config.require('accountId')
   const expectedRegion = new pulumi.Config('aws').require('region')
 
-  // The AWS provider region is independent of the application's secrets:AWS_REGION.
   const [caller, region, partition] = await Promise.all([
     aws.getCallerIdentity({}),
     aws.getRegion({}),

@@ -5,12 +5,12 @@ import type { Params } from 'nestjs-pino'
 import { pino } from 'pino'
 import { err as errorSerializer } from 'pino-std-serializers'
 
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 
 import { CustomException } from './types'
 
-export const pinoHttp: Params['pinoHttp'] = {
-  level: env.NODE_ENV === 'test' ? 'warn' : 'info',
+export const createPinoHttp = (nodeEnv: Env['NODE_ENV']): Params['pinoHttp'] => ({
+  level: nodeEnv === 'test' ? 'warn' : 'info',
   logger: pino(ecsFormat({ convertReqRes: true })),
   quietReqLogger: true,
   genReqId: () => {
@@ -55,4 +55,4 @@ export const pinoHttp: Params['pinoHttp'] = {
 
     return loggedErrorObject
   },
-}
+})

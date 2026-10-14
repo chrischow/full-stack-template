@@ -1,10 +1,11 @@
 import { Controller, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { AuthGuard } from '@nestjs/passport'
 import { Implement, implement } from '@orpc/nest'
 import { contract } from '@repo/api-contract'
 import { SessionUserSchema } from '@repo/api-contract/schemas'
 
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 
 import { AuthService } from './auth.service'
 import { OtpService } from './otp.service'
@@ -17,6 +18,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly otpService: OtpService,
     private readonly passkeyService: PasskeyService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
   @Public()
   @Implement(contract.auth.status)
@@ -56,7 +58,7 @@ export class AuthController {
       context.request.session.user = SessionUserSchema.parse(user)
       return {
         headers: {
-          location: `${env.APP_DOMAIN}/login/redirect`,
+          location: `${this.config.get('APP_DOMAIN', { infer: true })}/login/redirect`,
         },
       }
     })

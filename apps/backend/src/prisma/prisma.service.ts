@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@repo/db'
 
-import { env } from '@/env/schema'
+import { Env } from '@/env/schema'
 
 @Injectable()
 export class PrismaService extends PrismaClient {
-  constructor() {
+  constructor(config: ConfigService<Env, true>) {
     const adapter = new PrismaPg({
-      host: env.DB_HOST,
-      port: env.DB_PORT,
-      user: env.DB_USERNAME,
-      password: env.DB_PASSWORD,
-      database: env.DB_NAME,
+      host: config.get('DB_HOST', { infer: true }),
+      port: config.get('DB_PORT', { infer: true }),
+      user: config.get('DB_USERNAME', { infer: true }),
+      password: config.get('DB_PASSWORD', { infer: true }),
+      database: config.get('DB_NAME', { infer: true }),
     })
 
     super({ adapter })
