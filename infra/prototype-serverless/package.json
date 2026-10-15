@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@pulumi/aws": "^7.48.0",
+    "@pulumi/awsx": "^3.11.0",
     "@pulumi/pulumi": "^3.113.0"
   }
 }

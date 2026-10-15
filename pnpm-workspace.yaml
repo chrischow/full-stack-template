@@ -8,3 +8,5 @@ allowBuilds:
   prisma: true
   unrs-resolver: true
   protobufjs: false
+  '@pulumi/docker': true
+  '@pulumi/docker-build': true
