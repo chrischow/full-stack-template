@@ -1,4 +1,5 @@
 import * as aws from '@pulumi/aws'
+import * as awsx from '@pulumi/awsx'
 import * as pulumi from '@pulumi/pulumi'
 
 async function main() {
@@ -38,13 +39,26 @@ async function main() {
     }
   }
 
-  const image = aws.ecr.getImageOutput({
-    repositoryName: repository.name,
-    imageTag,
+  const image = new awsx.ecr.Image('prototype-serverless-built-image', {
+    repositoryUrl: repository.repositoryUrl,
     registryId: accountId,
-    region: expectedRegion,
+    imageTag,
+    context: '../..',
+    dockerfile: 'Dockerfile.lambda',
+    platform: 'linux/amd64',
   })
-  const imageUri = pulumi.interpolate`${repository.repositoryUrl}@${image.imageDigest}`
+
+  // Wait for the build and push before resolving the immutable tag to a digest.
+  const pushedImage = aws.ecr.getImageOutput(
+    {
+      repositoryName: repository.name,
+      imageTag,
+      registryId: accountId,
+      region: expectedRegion,
+    },
+    { dependsOn: [image] },
+  )
+  const imageUri = pulumi.interpolate`${repository.repositoryUrl}@${pushedImage.imageDigest}`
 
   const functionName = `${appName}-prototype`
   const executionRole = new aws.iam.Role('prototype-serverless-execution-role', {
@@ -191,7 +205,7 @@ async function main() {
   return {
     repositoryUrl: repository.repositoryUrl,
     repositoryArn: repository.arn,
-    imageDigest: image.imageDigest,
+    imageDigest: pushedImage.imageDigest,
     functionUrl: functionUrl.functionUrl,
     distributionDomain: distribution.domainName,
   }
