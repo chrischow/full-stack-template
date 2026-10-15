@@ -42,14 +42,14 @@ pulumi stack output repositoryUrl
 
 > **Note:** After running this for the first time, DO NOT run `pulumi up` without an image tag because this will remove the Lambda and distribution.
 
-Choose an immutable tag (e.g. commit SHA) for each image release. Pulumi will build the image, and push it to ECR.
+Choose an immutable tag (e.g. commit SHA) for each image release and export it as `IMAGE_TAG` for both preview and update. Pulumi will build the image and push it to ECR. Keep `IMAGE_TAG` set for subsequent previews and updates; without it the program runs in repository-only mode and would remove the Lambda and distribution.
 
 For the first run, this will create a Cloudfront distribution, log group, IAM role, and a Lambda function that is pointed at the newly-created image. For subsequent runs, deployments will build the image, point the Lambda function at the new image, and update the `live` alias.
 
 ```bash
 export IMAGE_TAG=<new-immutable-tag>
-pulumi preview --config "imageTag=$IMAGE_TAG"
-pulumi up --config "imageTag=$IMAGE_TAG"
+pulumi preview
+pulumi up
 pulumi stack output imageUri
 pulumi stack output distributionDomain
 ```

@@ -35,7 +35,7 @@ async function main() {
     },
   })
 
-  const imageTag = config.get('imageTag')
+  const imageTag = process.env.IMAGE_TAG
   if (!imageTag) {
     return {
       repositoryUrl: repository.repositoryUrl,
