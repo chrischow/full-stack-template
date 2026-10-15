@@ -40,12 +40,7 @@
     {
       "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
       "Effect": "Allow",
-      "Action": [
-        "lambda:GetAlias",
-        "lambda:UpdateAlias",
-        "lambda:GetFunctionUrlConfig",
-        "lambda:GetPolicy"
-      ],
+      "Action": ["lambda:GetAlias", "lambda:UpdateAlias", "lambda:GetFunctionUrlConfig", "lambda:GetPolicy"],
       "Resource": "${LAMBDA_ALIAS_ARN}"
     },
     {
@@ -75,11 +70,7 @@
     {
       "Sid": "ReadExistingCloudFrontDistribution",
       "Effect": "Allow",
-      "Action": [
-        "cloudfront:GetDistribution",
-        "cloudfront:GetDistributionConfig",
-        "cloudfront:ListTagsForResource"
-      ],
+      "Action": ["cloudfront:GetDistribution", "cloudfront:GetDistributionConfig", "cloudfront:ListTagsForResource"],
       "Resource": "${CLOUDFRONT_DISTRIBUTION_ARN}"
     },
     {
@@ -109,63 +100,55 @@
       "Resource": "${STATE_BUCKET_ARN}"
     },
     {
-      "Sid": "ListOnlyAppAndReferencedSecretsState",
+      "Sid": "ListAppBackendState",
       "Effect": "Allow",
-      "Action": [
-        "s3:ListBucket",
-        "s3:ListBucketVersions"
-      ],
+      "Action": ["s3:ListBucket", "s3:ListBucketVersions"],
       "Resource": "${STATE_BUCKET_ARN}",
       "Condition": {
         "StringLike": {
-          "s3:prefix": [
-            "${APP_STATE_PREFIX}",
-            "${APP_STATE_PREFIX}/*",
-            "${SECRETS_STATE_PREFIX}",
-            "${SECRETS_STATE_PREFIX}/*"
-          ]
+          "s3:prefix": ["app", "app/*"]
         }
       }
     },
     {
-      "Sid": "ReadAndWriteOnlyAppStackState",
+      "Sid": "ReadAppBackendMetadata",
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion",
-        "s3:PutObject",
-        "s3:DeleteObject"
-      ],
-      "Resource": "${APP_STATE_OBJECTS_ARN}"
+      "Action": "s3:GetObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/meta.yaml"
     },
     {
-      "Sid": "ReadReferencedSecretsStackState",
+      "Sid": "ReadAndWritePrototypeServerlessProjectState",
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion"
-      ],
-      "Resource": "${SECRETS_STATE_OBJECTS_ARN}"
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject"],
+      "Resource": [
+        "${STATE_BUCKET_ARN}/app/.pulumi/stacks/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/history/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/backups/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+      ]
+    },
+    {
+      "Sid": "DeletePrototypeServerlessProjectLocks",
+      "Effect": "Allow",
+      "Action": "s3:DeleteObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+    },
+    {
+      "Sid": "ReadReferencedSecretsStackCheckpoint",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/stacks/secrets/prototype.json"
     },
     {
       "Sid": "EncryptAndDecryptS3State",
       "Effect": "Allow",
-      "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:GenerateDataKey",
-        "kms:DescribeKey"
-      ],
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"],
       "Resource": "${STATE_KMS_KEY_ARN}"
     },
     {
       "Sid": "EncryptAndDecryptPulumiStackSecrets",
       "Effect": "Allow",
-      "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:DescribeKey"
-      ],
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey"],
       "Resource": "${PULUMI_SECRETS_PROVIDER_KEY_ARN}"
     },
     {
