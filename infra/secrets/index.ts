@@ -121,4 +121,6 @@ export = async () => {
       tags: { Project: 'secrets', Env: stack },
     })
   }
+
+  return { ssmKeyArn: ssmKey.arn }
 }

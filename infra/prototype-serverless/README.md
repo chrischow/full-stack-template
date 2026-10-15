@@ -50,7 +50,7 @@ For the first run, this will create a Cloudfront distribution, log group, IAM ro
 export IMAGE_TAG=<new-immutable-tag>
 pulumi preview --config "imageTag=$IMAGE_TAG"
 pulumi up --config "imageTag=$IMAGE_TAG"
-pulumi stack output imageDigest
+pulumi stack output imageUri
 pulumi stack output distributionDomain
 ```
 

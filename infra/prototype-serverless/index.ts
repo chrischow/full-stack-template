@@ -8,7 +8,11 @@ async function main() {
   const appName = config.require('appName')
   const expectedRegion = new pulumi.Config('aws').require('region')
 
-  const [caller, region] = await Promise.all([aws.getCallerIdentity({}), aws.getRegion({})])
+  const [caller, region, partition] = await Promise.all([
+    aws.getCallerIdentity({}),
+    aws.getRegion({}),
+    aws.getPartition({}),
+  ])
 
   if (caller.accountId !== accountId) {
     throw new Error(
@@ -39,26 +43,20 @@ async function main() {
     }
   }
 
+  // Only image-backed deployments create the Lambda and need its SSM key ARN.
+  const secretsStack = new pulumi.StackReference('prototype-serverless-secrets', {
+    name: `organization/secrets/${pulumi.getStack()}`,
+  })
+  const ssmKmsKeyArn = secretsStack.requireOutput('ssmKeyArn')
+
   const image = new awsx.ecr.Image('prototype-serverless-built-image', {
     repositoryUrl: repository.repositoryUrl,
     registryId: accountId,
     imageTag,
     context: '../..',
-    dockerfile: 'Dockerfile.lambda',
+    dockerfile: '../../Dockerfile.lambda',
     platform: 'linux/amd64',
   })
-
-  // Wait for the build and push before resolving the immutable tag to a digest.
-  const pushedImage = aws.ecr.getImageOutput(
-    {
-      repositoryName: repository.name,
-      imageTag,
-      registryId: accountId,
-      region: expectedRegion,
-    },
-    { dependsOn: [image] },
-  )
-  const imageUri = pulumi.interpolate`${repository.repositoryUrl}@${pushedImage.imageDigest}`
 
   const functionName = `${appName}-prototype`
   const executionRole = new aws.iam.Role('prototype-serverless-execution-role', {
@@ -109,13 +107,35 @@ async function main() {
     }),
   })
 
+  const kmsDecryptPolicy = new aws.iam.RolePolicy('prototype-serverless-kms-decrypt', {
+    role: executionRole.id,
+    policy: pulumi.jsonStringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['kms:Decrypt'],
+          Resource: ssmKmsKeyArn,
+          Condition: {
+            StringEquals: {
+              'kms:ViaService': `ssm.${expectedRegion}.${partition.dnsSuffix}`,
+            },
+            StringLike: {
+              'kms:EncryptionContext:PARAMETER_ARN': `arn:${partition.partition}:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+            },
+          },
+        },
+      ],
+    }),
+  })
+
   const lambda = new aws.lambda.Function(
     'prototype-serverless-function',
     {
       name: functionName,
       role: executionRole.arn,
       packageType: 'Image',
-      imageUri,
+      imageUri: image.imageUri,
       architectures: ['x86_64'],
       memorySize: 1024,
       timeout: 30,
@@ -127,7 +147,7 @@ async function main() {
         },
       },
     },
-    { dependsOn: [loggingPolicy, ssmPolicy] },
+    { dependsOn: [loggingPolicy, ssmPolicy, kmsDecryptPolicy] },
   )
 
   const alias = new aws.lambda.Alias('prototype-serverless-live', {
@@ -219,7 +239,7 @@ async function main() {
   return {
     repositoryUrl: repository.repositoryUrl,
     repositoryArn: repository.arn,
-    imageDigest: pushedImage.imageDigest,
+    imageUri: image.imageUri,
     functionUrl: functionUrl.functionUrl,
     distributionDomain: distribution.domainName,
   }
@@ -228,7 +248,7 @@ async function main() {
 const outputs = main()
 export const repositoryUrl = outputs.then((result) => result.repositoryUrl)
 export const repositoryArn = outputs.then((result) => result.repositoryArn)
-export const imageDigest = outputs.then((result) => ('imageDigest' in result ? result.imageDigest : undefined))
+export const imageUri = outputs.then((result) => ('imageUri' in result ? result.imageUri : undefined))
 export const functionUrl = outputs.then((result) => ('functionUrl' in result ? result.functionUrl : undefined))
 export const distributionDomain = outputs.then((result) =>
   'distributionDomain' in result ? result.distributionDomain : undefined,
