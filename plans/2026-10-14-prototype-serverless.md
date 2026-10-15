@@ -32,7 +32,7 @@ Leave `Dockerfile` intact and add root `Dockerfile.lambda`, reusing its build/pa
 - [x] Add the ECR repository, Pulumi AWS dependency, prototype stack/account/region safeguards, and no-image bootstrap mode. Export ECR repository URL so the operator can push an immutable tagged image.
 - [x] Resolve `imageTag` to an existing ECR digest, then configure Lambda image, execution IAM, region/runtime settings, and only the scoped secret-read/decrypt permissions required by the separate application retrieval effort (no Pulumi-managed secret values). If using a version/alias, manage both solely with Pulumi and attach the IAM-authenticated Function URL to the alias. Runtime SSM/KMS grants remain deferred until the retrieval effort identifies exact parameters and the separate SSM key ARN; no unscoped grant is added.
 - [x] Add CloudFront OAC and restricted Function URL invocation, uncached API and HTML behavior, and only validated immutable asset caching. Set native geographic restrictions to allow only Singapore; do not provision WAF or broad 403/404-to-HTML rewrites. All assets remain uncached until their fingerprinted names and error responses are verified.
-- [ ] Document two-phase ECR/image/stack deployment, `pulumi up --config imageTag=...`, dependency on separate runtime-secret loading and callback/passkey origin configuration, and checks of origin isolation, geographic restriction, and subsequent image-tag updates.
+- [x] Document two-phase ECR/image/stack deployment, `pulumi up --config imageTag=...`, dependency on separate runtime-secret loading and callback/passkey origin configuration, and checks of origin isolation, geographic restriction, and subsequent image-tag updates.
 
 ## Verification
 
