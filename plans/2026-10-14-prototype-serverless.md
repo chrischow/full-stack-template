@@ -34,6 +34,12 @@ Leave `Dockerfile` intact and add root `Dockerfile.lambda`, reusing its build/pa
 - [x] Add CloudFront OAC and restricted Function URL invocation, uncached API and HTML behavior, and only validated immutable asset caching. Set native geographic restrictions to allow only Singapore; do not provision WAF or broad 403/404-to-HTML rewrites. All assets remain uncached until their fingerprinted names and error responses are verified.
 - [x] Document two-phase ECR/image/stack deployment, `pulumi up --config imageTag=...`, dependency on separate runtime-secret loading and callback/passkey origin configuration, and checks of origin isolation, geographic restriction, and subsequent image-tag updates.
 
+## Update — 2026-10-15: Pulumi-managed image publishing
+
+This is an update to the completed plan above, **not** a retroactive change to its approved manual-publishing approach or checked steps. The prototype now builds and pushes the Lambda image during tagged `pulumi up` using `@pulumi/awsx`'s `ecr.Image`, rather than requiring an operator to build and push it separately. The existing ECR-only bootstrap without `imageTag`, account/region safeguards, immutable repository tags, and Pulumi-managed digest-pinned Lambda image/version/alias remain in place. The build uses the repository root as context, `Dockerfile.lambda`, and `linux/amd64`; an ECR digest lookup waits for the image resource to finish pushing before Lambda uses the digest.
+
+The operator must choose a new unused `imageTag` per release, have a working Docker build environment and ECR push access, and run tagged preview/update from `infra/prototype-serverless`. Preview may not know the digest and does not publish an image; verify the pushed digest after `up`. The deployment README now reflects this workflow. Dependency installation, required code-quality checks, and implementation/documentation commits are complete; AWS previews and deployment remain operator verification with authorized access, not proof of application readiness.
+
 ## Verification
 
 - Run `pnpm lint:fix`, `pnpm format:fix`, and `pnpm check-types` after each implementation step and verify the completed codebase builds.
