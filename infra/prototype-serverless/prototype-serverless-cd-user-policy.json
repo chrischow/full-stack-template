@@ -22,7 +22,7 @@
         "ecr:CompleteLayerUpload",
         "ecr:PutImage"
       ],
-      "Resource": "${ECR_REPOSITORY_ARN}"
+      "Resource": "${repositoryArn}"
     },
     {
       "Sid": "UpdateExistingFunctionImageAndPublishVersion",
@@ -35,13 +35,13 @@
         "lambda:UpdateFunctionCode",
         "lambda:PublishVersion"
       ],
-      "Resource": "${LAMBDA_FUNCTION_ARN}"
+      "Resource": "${lambdaFunctionArn}"
     },
     {
       "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
       "Effect": "Allow",
       "Action": ["lambda:GetAlias", "lambda:UpdateAlias", "lambda:GetFunctionUrlConfig", "lambda:GetPolicy"],
-      "Resource": "${LAMBDA_ALIAS_ARN}"
+      "Resource": "${lambdaAliasArn}"
     },
     {
       "Sid": "ReadExistingExecutionRoleAndInlinePolicies",
@@ -53,13 +53,13 @@
         "iam:ListAttachedRolePolicies",
         "iam:ListRoleTags"
       ],
-      "Resource": "${LAMBDA_EXECUTION_ROLE_ARN}"
+      "Resource": "${lambdaExecutionRoleArn}"
     },
     {
       "Sid": "ReadExistingLogGroupTags",
       "Effect": "Allow",
       "Action": "logs:ListTagsForResource",
-      "Resource": "${LAMBDA_LOG_GROUP_ARN}"
+      "Resource": "${lambdaLogGroupArn}"
     },
     {
       "Sid": "DescribeLogGroups",
@@ -71,7 +71,7 @@
       "Sid": "ReadExistingCloudFrontDistribution",
       "Effect": "Allow",
       "Action": ["cloudfront:GetDistribution", "cloudfront:GetDistributionConfig", "cloudfront:ListTagsForResource"],
-      "Resource": "${CLOUDFRONT_DISTRIBUTION_ARN}"
+      "Resource": "${cloudfrontDistributionArn}"
     },
     {
       "Sid": "ReadExistingCloudFrontOriginAccessControl",
@@ -81,7 +81,7 @@
         "cloudfront:GetOriginAccessControlConfig",
         "cloudfront:ListTagsForResource"
       ],
-      "Resource": "${CLOUDFRONT_OAC_ARN}"
+      "Resource": "${cloudfrontOacArn}"
     },
     {
       "Sid": "ReadExistingCloudFrontOriginRequestPolicy",
@@ -91,7 +91,7 @@
         "cloudfront:GetOriginRequestPolicyConfig",
         "cloudfront:ListTagsForResource"
       ],
-      "Resource": "${CLOUDFRONT_ORIGIN_REQUEST_POLICY_ARN}"
+      "Resource": "${cloudfrontOriginRequestPolicyArn}"
     },
     {
       "Sid": "ReadStateBucket",
