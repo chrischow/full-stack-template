@@ -56,6 +56,9 @@ async function main() {
     context: '../..',
     dockerfile: '../../Dockerfile.lambda',
     platform: 'linux/amd64',
+    args: {
+      LOCAL_BUILD: 'true',
+    },
   })
 
   const functionName = `${appName}-prototype`
@@ -147,7 +150,6 @@ async function main() {
           CONFIG_SOURCE: 'ssm',
           SSM_PARAMETER_PREFIX: '/prototype',
           NODE_ENV: 'production',
-          AWS_REGION: 'ap-southeast-1',
         },
       },
     },
