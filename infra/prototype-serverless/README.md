@@ -54,6 +54,41 @@ pulumi stack output imageUri
 pulumi stack output distributionDomain
 ```
 
+### Overcoming Corporate Firewall
+
+Follow these instructions when deploying the image for the first time from a local device behind a corporate firewall.
+
+Copy your corporate CA certificate into the Docker BuildKit container's certs folder:
+
+```bash
+podman cp <path-to-ca-cert> <name-of-buildkit-container>:/etc/ssl/certs/
+```
+
+Reload the BuildKit daemon **INSIDE the container**:
+
+```bash
+pkill -HUP buildkitd
+```
+
+The above instructions will enable the BuildKit container to trust the self-signed certificate on the firewall.
+
+However, as part of the build, the BuildKit container will fail to install the Prisma binaries in the step `turbo build --filter=backend --filter=frontend`. To resolve this, in `Dockerfile.lambda`, temporarily set the `LOCAL_BUILD` argument on the `awsx.ecr.Image` resource in `infra/prototype-serverless/index.ts`:
+
+```ts
+const image = new awsx.ecr.Image('prototype-serverless-built-image', {
+    repositoryUrl: repository.repositoryUrl,
+    registryId: accountId,
+    imageTag,
+    context: '../..',
+    dockerfile: '../../Dockerfile.lambda',
+    platform: 'linux/amd64',
+    // ADD BLOCK BELOW TEMPORARILY
+    args: {
+      LOCAL_BUILD: 'true'
+    }
+  })
+```
+
 ## Validation and known limits
 
 - Build and locally smoke-test the Lambda container: check `/api/v1/health` (requires a reachable database), SPA deep links, built assets, missing assets (must not return HTML as 200), and API error paths. Ensure runtime configuration is available **before NestJS modules load**.
