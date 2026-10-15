@@ -27,11 +27,15 @@ The `prototype-serverless` Pulumi program in `infra/prototype-serverless/index.t
 - `.github/workflows/ci.yml` for repository Node/pnpm and `develop` conventions; `Dockerfile.lambda` plus workspace manifests for image-affecting path filters.
 - `rfc/2026-10-06-rfc-pulumi-iac-self-managed-state.md` for prior CD authentication proposal (access keys; not an implemented runner role).
 
+## Policy review notes
+
+The inline-policy template uses repository, unqualified function, `live` alias, execution-role, log-group, and individual CloudFront resource ARNs for workload operations and refresh reads. `ecr:GetAuthorizationToken`, `logs:DescribeLogGroups`, and `sts:GetCallerIdentity` are isolated wildcard-resource actions; S3 bucket listing is prefix-conditioned for the existing app and referenced secrets stacks, while object access is write-enabled only for app state. State SSE-KMS and Pulumi secrets-provider KMS grants use separate exact-key placeholders. Bucket-level location reads and object-level state access use different resource types. This policy intentionally excludes IAM/CloudFront writes, ECR repository creation, Lambda resource creation and permission writes, log writes, and SSM runtime-secret reads; any future infrastructure changes require a separate permission review. The JSON remains a template until every placeholder is resolved and tested against deployed stack resources.
+
 ## Steps
 
 > After **each implementation step**, run the code-quality checks (`lint:fix`, `format:fix`, `check-types`) **through the `code-quality-checker` subagent only**, then commit that step's changes, including plan-file updates such as checking off the step. Planning itself changes no code.
 
-- [ ] Derive and add the smallest viable **placeholder-based** IAM user inline-policy document for updates to existing resources, including ECR authentication/push, Lambda update/version/alias operations, Pulumi provider reads, and S3/KMS backend access; ensure JSON syntax, action/resource support, and excluded write/create permissions are documented.
+- [x] Derive and add the smallest viable **placeholder-based** IAM user inline-policy document for updates to existing resources, including ECR authentication/push, Lambda update/version/alias operations, Pulumi provider reads, and S3/KMS backend access; ensure JSON syntax, action/resource support, and excluded write/create permissions are documented.
 - [ ] Add a `deploy` job and changed-files detection to `.github/workflows/ci.yml`. Gate deployment on a push to `develop`, successful CI, and an app-affecting non-Markdown change; use GitHub Actions access-key secrets, correct backend/stack selection, immutable SHA tag, and serialized deployment.
 - [ ] **Documentation (last):** update `infra/prototype-serverless/README.md` with the dedicated IAM user/inline-policy setup, required ARN placeholder substitutions and how to find the actual state prefix/state KMS ARN, GitHub Actions variable/secret names, safeguards, trigger boundaries, and operator-run verification/rollback instructions. No IAM user, access key, or policy attachment is created by Pulumi or this workflow; reflect the agreed decisions in this plan.
 

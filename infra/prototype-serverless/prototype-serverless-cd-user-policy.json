@@ -1,0 +1,178 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AuthenticateToEcr",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadAndPushExistingImageRepository",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages",
+        "ecr:ListTagsForResource",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
+      ],
+      "Resource": "${ECR_REPOSITORY_ARN}"
+    },
+    {
+      "Sid": "UpdateExistingFunctionImageAndPublishVersion",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:ListVersionsByFunction",
+        "lambda:ListTags",
+        "lambda:UpdateFunctionCode",
+        "lambda:PublishVersion"
+      ],
+      "Resource": "${LAMBDA_FUNCTION_ARN}"
+    },
+    {
+      "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetAlias",
+        "lambda:UpdateAlias",
+        "lambda:GetFunctionUrlConfig",
+        "lambda:GetPolicy"
+      ],
+      "Resource": "${LAMBDA_ALIAS_ARN}"
+    },
+    {
+      "Sid": "ReadExistingExecutionRoleAndInlinePolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRoleTags"
+      ],
+      "Resource": "${LAMBDA_EXECUTION_ROLE_ARN}"
+    },
+    {
+      "Sid": "ReadExistingLogGroupTags",
+      "Effect": "Allow",
+      "Action": "logs:ListTagsForResource",
+      "Resource": "${LAMBDA_LOG_GROUP_ARN}"
+    },
+    {
+      "Sid": "DescribeLogGroups",
+      "Effect": "Allow",
+      "Action": "logs:DescribeLogGroups",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontDistribution",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "${CLOUDFRONT_DISTRIBUTION_ARN}"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontOriginAccessControl",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginAccessControl",
+        "cloudfront:GetOriginAccessControlConfig",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "${CLOUDFRONT_OAC_ARN}"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontOriginRequestPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginRequestPolicy",
+        "cloudfront:GetOriginRequestPolicyConfig",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "${CLOUDFRONT_ORIGIN_REQUEST_POLICY_ARN}"
+    },
+    {
+      "Sid": "ReadStateBucket",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "${STATE_BUCKET_ARN}"
+    },
+    {
+      "Sid": "ListOnlyAppAndReferencedSecretsState",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketVersions"
+      ],
+      "Resource": "${STATE_BUCKET_ARN}",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "${APP_STATE_PREFIX}",
+            "${APP_STATE_PREFIX}/*",
+            "${SECRETS_STATE_PREFIX}",
+            "${SECRETS_STATE_PREFIX}/*"
+          ]
+        }
+      }
+    }
+    {
+      "Sid": "ReadAndWriteOnlyAppStackState",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "${APP_STATE_OBJECTS_ARN}"
+    },
+    {
+      "Sid": "ReadReferencedSecretsStackState",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": "${SECRETS_STATE_OBJECTS_ARN}"
+    },
+    {
+      "Sid": "EncryptAndDecryptS3State",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+        "kms:DescribeKey"
+      ],
+      "Resource": "${STATE_KMS_KEY_ARN}"
+    },
+    {
+      "Sid": "EncryptAndDecryptPulumiStackSecrets",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ],
+      "Resource": "${PULUMI_SECRETS_PROVIDER_KEY_ARN}"
+    },
+    {
+      "Sid": "CheckTargetAwsAccount",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    }
+  ]
+}
