@@ -59,9 +59,6 @@ async function main() {
       context: '../..',
       dockerfile: '../../Dockerfile.lambda',
       platform: 'linux/amd64',
-      args: {
-        LOCAL_BUILD: 'true',
-      },
     },
     {
       retainOnDelete: true,
