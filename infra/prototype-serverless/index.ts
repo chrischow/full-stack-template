@@ -2,7 +2,7 @@ import * as aws from '@pulumi/aws'
 import * as awsx from '@pulumi/awsx'
 import * as pulumi from '@pulumi/pulumi'
 
-async function main() {
+export = async () => {
   const config = new pulumi.Config('prototype-serverless')
   const accountId = config.require('accountId')
   const appName = config.require('appName')
@@ -252,17 +252,15 @@ async function main() {
   return {
     repositoryUrl: repository.repositoryUrl,
     repositoryArn: repository.arn,
+    lambdaFunctionArn: lambda.arn,
+    lambdaAliasArn: alias.arn,
+    lambdaExecutionRoleArn: executionRole.arn,
+    lambdaLogGroupArn: logGroup.arn,
+    cloudfrontDistributionArn: distribution.arn,
+    cloudfrontOacArn: originAccessControl.arn,
+    cloudfrontOriginRequestPolicyArn: originRequestPolicy.arn,
     imageUri: image.imageUri,
     functionUrl: functionUrl.functionUrl,
     distributionDomain: distribution.domainName,
   }
 }
-
-const outputs = main()
-export const repositoryUrl = outputs.then((result) => result.repositoryUrl)
-export const repositoryArn = outputs.then((result) => result.repositoryArn)
-export const imageUri = outputs.then((result) => ('imageUri' in result ? result.imageUri : undefined))
-export const functionUrl = outputs.then((result) => ('functionUrl' in result ? result.functionUrl : undefined))
-export const distributionDomain = outputs.then((result) =>
-  'distributionDomain' in result ? result.distributionDomain : undefined,
-)
