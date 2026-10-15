@@ -50,6 +50,7 @@ export = async () => {
   })
   const ssmKmsKeyArn = secretsStack.requireOutput('ssmKeyArn')
 
+  const isLocalBuild = process.env.CI === 'true' ? 'false' : 'true'
   const image = new awsx.ecr.Image(
     'prototype-serverless-built-image',
     {
@@ -59,6 +60,9 @@ export = async () => {
       context: '../..',
       dockerfile: '../../Dockerfile.lambda',
       platform: 'linux/amd64',
+      args: {
+        LOCAL_BUILD: isLocalBuild,
+      },
     },
     {
       retainOnDelete: true,
