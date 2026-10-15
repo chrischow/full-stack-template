@@ -144,6 +144,10 @@ async function main() {
         variables: {
           APP_PORT: '8080',
           AWS_LWA_PORT: '8080',
+          CONFIG_SOURCE: 'ssm',
+          SSM_PARAMETER_PREFIX: '/prototype',
+          NODE_ENV: 'production',
+          AWS_REGION: 'ap-southeast-1',
         },
       },
     },
