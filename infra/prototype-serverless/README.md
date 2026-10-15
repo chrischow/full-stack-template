@@ -1,51 +1,58 @@
 # Prototype serverless deployment
 
-This Pulumi project provisions an ECR repository, then builds and pushes a Lambda image with `awsx.ecr.Image` and provisions Lambda and CloudFront. It is a **prototype**, not a validated production platform. Runtime secret loading, release automation, and rollback are separate work.
+This Pulumi project provisions an ECR repository, then builds and pushes a Lambda image with `awsx.ecr.Image` and provisions Lambda and CloudFront. It is a **prototype**, not a validated production platform.
 
-## Target and prerequisites
+## Prerequisites
 
-- The committed `Pulumi.prototype.yaml` targets AWS account `699037282084` in `ap-southeast-1`. Confirm the target with the authorized operator before applying anything. The program checks the caller account and provider region.
-- Complete `infra/bootstrap` first. Use the prototype state backend `s3://fst-pulumi-state-prototype-699037282084/prototype`, with access to its state bucket and the **external Pulumi KMS secrets-provider key** configured in `Pulumi.prototype.yaml`. This key is **not** the SSM encryption key managed by `infra/secrets`.
-- Select an authorized AWS profile; the profile name is not fixed in this repository. Do not put credentials, plaintext secrets, or application secret values in Pulumi config, Docker builds, Lambda environment, or logs.
-- Run Pulumi commands from `infra/prototype-serverless`. For image-backed updates, have a working Docker build environment and AWS credentials authorized to push to ECR. Pulumi uses the repository root (`../..`) as the build context, root `Dockerfile.lambda`, and `linux/amd64` to match Lambda's `x86_64` architecture. Review the selected stack, backend, caller identity, and preview before every update.
+- The `bootstrap` prototype stack must be initialised
+- The `secrets` prototyep stack must be initialised with the required secrets
+- AWS credentials to manage ECR, Lambda, and Cloudfront
 
-```sh
+## Initialisation
+
+Login to the remote backend:
+
+```bash
 export AWS_PROFILE='<authorized-prototype-profile>'
-aws sts get-caller-identity
-pulumi login 's3://fst-pulumi-state-prototype-699037282084/prototype'
+pulumi login 's3://fst-pulumi-state-prototype-<account-id>/app'
+```
+
+Initialise the `prototype` stack:
+
+```bash
+pulumi stack init prototype --secrets-provider "awskms:///<cmk-arn>"
+```
+
+Confirm that it has been initialised, and select it:
+
+```bash
 pulumi stack ls
 pulumi stack select prototype
 ```
 
-For a **new** stack only, use `pulumi stack init prototype --secrets-provider 'awskms:///arn:aws:kms:ap-southeast-1:699037282084:key/24d4ca90-0fd7-4bc6-8716-9e48d76dab9f'` instead of selecting an existing stack. Verify that this remains the approved provider before initializing; never initialize an existing stack again.
+Bootstrap the image repository by deploying **without an image tag**. This will simply create the ECR repo.
 
-## Phase 1: bootstrap the image repository
-
-Without `imageTag`, only the immutable-tag ECR repository is provisioned. Ensure no `imageTag` is already set in the selected stack before bootstrapping; **do not run an image-less update on a deployed stack**, because that would remove the Lambda and distribution.
-
-```sh
+```bash
 pulumi preview
 pulumi up
 pulumi stack output repositoryUrl
 ```
 
-Confirm the preview shows only ECR resources and no unexpected changes. Record the repository URL. Do not run an image-less update after deploying Lambda: it would remove the image-backed resources.
+## Deploy New Image
 
-## Phase 2: build and deploy the image-backed stack
+> **Note:** After running this for the first time, DO NOT run `pulumi up` without an image tag because this will remove the Lambda and distribution.
 
-From `infra/prototype-serverless`, choose a **new, unused immutable tag** for each image release. On `pulumi up`, AWSX builds `Dockerfile.lambda` from the repository root and pushes the image to ECR. Pulumi waits for the push, resolves the tag to its ECR digest, pins Lambda to that digest, and manages the published version and `live` alias. Never update Lambda code or the alias outside Pulumi; do not bake application secrets into the image.
+Choose an immutable tag (e.g. commit SHA) for each image release. Pulumi will build the image, and push it to ECR.
 
-```sh
-export IMAGE_TAG='<new-immutable-tag>'
+For the first run, this will create a Cloudfront distribution, log group, IAM role, and a Lambda function that is pointed at the newly-created image. For subsequent runs, deployments will build the image, point the Lambda function at the new image, and update the `live` alias.
+
+```bash
+export IMAGE_TAG=<new-immutable-tag>
 pulumi preview --config "imageTag=$IMAGE_TAG"
 pulumi up --config "imageTag=$IMAGE_TAG"
 pulumi stack output imageDigest
 pulumi stack output distributionDomain
 ```
-
-Review the preview for the expected image, Lambda, IAM, Function URL, OAC, and distribution changes, with no plaintext credentials. The image digest may be unknown during preview because the image has not yet been pushed; preview does **not** build or push the image. After `up`, confirm the image exists in the intended account and region, and check the exported digest. CloudFront's generated hostname is the public origin; custom DNS, ACM, and WAF are out of scope. API, HTML, and assets are currently **uncached**. Enable immutable asset caching only after verifying the build's fingerprinted names and missing-asset responses.
-
-For an image update, select another unused tag and repeat the tagged `preview` and `up`. Reusing a tag for changed content conflicts with the repository's immutable-tag policy. Verify the digest and alias move to the new Pulumi-managed version without unrelated changes.
 
 ## Validation and known limits
 
