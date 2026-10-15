@@ -126,7 +126,7 @@
           ]
         }
       }
-    }
+    },
     {
       "Sid": "ReadAndWriteOnlyAppStackState",
       "Effect": "Allow",

@@ -5,8 +5,8 @@ This Pulumi project provisions an ECR repository, then builds and pushes a Lambd
 ## Prerequisites
 
 - The `bootstrap` prototype stack must be initialised
-- The `secrets` prototyep stack must be initialised with the required secrets
-- AWS credentials to manage ECR, Lambda, and Cloudfront
+- The `secrets` prototype stack must be initialised with the required secrets
+- AWS credentials to manage ECR, Lambda, and CloudFront
 
 ## Initialisation
 
@@ -14,7 +14,7 @@ Login to the remote backend:
 
 ```bash
 export AWS_PROFILE='<authorized-prototype-profile>'
-pulumi login 's3://fst-pulumi-state-prototype-<account-id>/app'
+pulumi login 's3://<verified-state-bucket>/<verified-app-backend-prefix>'
 ```
 
 Initialise the `prototype` stack:
@@ -54,6 +54,46 @@ pulumi stack output imageUri
 pulumi stack output distributionDomain
 ```
 
+## Continuous deployment on `develop`
+
+The `deploy` job in `.github/workflows/ci.yml` is for **updates to an already-provisioned image-backed `prototype` stack**, not initialisation. First deploy the repository, Lambda, `live` alias, CloudFront, IAM role, and secrets stack with an operator identity using the manual steps above. Configure CD **before** pushing the workflow change to `develop`; without the required credentials/backend, a qualifying push reaches the deploy job but cannot update the stack. No IAM user, access key, inline-policy attachment, state bucket, or Pulumi stack is created by this workflow or the prototype-serverless Pulumi project.
+
+### Set up the dedicated deployer
+
+1. As an authorised operator, retrieve the existing bootstrap stack outputs `stateBucketName`, `stateBucketArn`, and `stateKeyArn` (`infra/bootstrap/index.ts`). Log in to its **existing** `/bootstrap` backend and select `prototype` before running `pulumi stack output <name>` from `infra/bootstrap`. `stateKeyArn` is the S3 state encryption key, **not** the Pulumi secrets-provider key in `Pulumi.prototype.yaml` and not the secrets project's SSM key.
+2. Confirm the actual app backend URL and S3 keys with an authorised read-only identity before granting access. This README historically used `/app`, while `infra/bootstrap/README.md` describes `/prototype`; the secrets project documents `/secrets`. Do not infer the deployed prefix from either document. For the bucket obtained above, inspect `aws s3api list-objects-v2 --bucket '<state-bucket-name>' --query 'Contents[].Key' --output text` and check the existing backend login/stack selection used by operators. Pulumi stores stack state and lock objects (for example, under `.pulumi/locks/`) beneath a backend prefix. Match the policy's list prefixes **and object ARN patterns** to the complete backend prefix and all descendants for both the app and referenced secrets stack; do not include other stacks. This template assumes both stacks use the same bucket. If they do not, revise the policy with a separate secrets bucket ARN in the list/location statement and the secrets object ARN before use.
+3. Using the operator's credentials, log in to the verified app backend from `infra/prototype-serverless`, select the **existing** `prototype` stack, and read `pulumi stack output repositoryArn`. Obtain the remaining physical ARNs from the deployed stack (for example, filter `pulumi stack export` to just the ARN/ID outputs of the IAM role, CloudFront distribution/OAC/origin-request-policy, Lambda function/alias, and log group). The full stack export can contain secrets: do not save or share it. Check ARN partition, account, region, physical names, and the `live` qualifier; don't substitute Pulumi logical names for generated physical identifiers.
+4. Create a **dedicated IAM user** and access key outside Pulumi, using authorised operator credentials. Render `prototype-serverless-cd-user-policy.json` by replacing **every JSON-string `${...}` placeholder** with the confirmed value below, validate the rendered document as JSON and review IAM action/resource compatibility, then attach it as this user's **inline policy**. Never attach the template with unresolved placeholders, commit the rendered policy, or grant the user unrelated IAM/CloudFront writes. Keep the key private and rotate/revoke it if exposed.
+
+| Template placeholder(s) | Substitute with |
+| --- | --- |
+| `ECR_REPOSITORY_ARN` | Existing repository ARN from `repositoryArn`. |
+| `LAMBDA_FUNCTION_ARN`, `LAMBDA_ALIAS_ARN` | Existing unqualified function ARN and that function's `:live` alias ARN. |
+| `LAMBDA_EXECUTION_ROLE_ARN`, `LAMBDA_LOG_GROUP_ARN` | Existing execution-role ARN and `/aws/lambda/<function-name>` log-group ARN. |
+| `CLOUDFRONT_DISTRIBUTION_ARN`, `CLOUDFRONT_OAC_ARN`, `CLOUDFRONT_ORIGIN_REQUEST_POLICY_ARN` | Three distinct deployed CloudFront resource ARNs, using their actual IDs. |
+| `STATE_BUCKET_ARN`, `STATE_KMS_KEY_ARN` | Bootstrap `stateBucketArn` and `stateKeyArn` outputs. |
+| `APP_STATE_PREFIX`, `SECRETS_STATE_PREFIX` | Confirmed backend S3 object-key/listing prefixes (no `s3://`, bucket name, or trailing slash) for the app and referenced secrets stacks; include stack-state and lock paths. |
+| `APP_STATE_OBJECTS_ARN`, `SECRETS_STATE_OBJECTS_ARN` | Object ARN patterns for the **entire** respective backend prefix and descendants, including Pulumi lock objects, e.g. `arn:aws:s3:::<bucket>/<backend-prefix>/*`; the secrets objects are **read-only** in this policy. |
+| `PULUMI_SECRETS_PROVIDER_KEY_ARN` | Pulumi `awskms:///` secrets-provider key ARN from `Pulumi.prototype.yaml`, confirmed against the existing stack (and referenced secrets stack if distinct). |
+
+The template separates the wildcard-only ECR token, log-group description, and caller-identity actions from resource-scoped ECR push, Lambda function/version/alias operations, refresh reads, state S3 access, and the two KMS key uses. It deliberately does **not** allow creating resources, modifying IAM/CloudFront, writing Lambda permissions, or reading SSM runtime parameters. A future infrastructure change that requires any of those permissions needs a separate review; do not widen this policy simply to bypass a failed deployment. This identity cannot bootstrap an empty stack.
+
+### Configure and operate GitHub Actions
+
+Set the following in the repository's GitHub Actions settings (no protected GitHub Environment is required):
+
+- **Variable** `PROTOTYPE_PULUMI_BACKEND_URL`: the verified existing app backend, e.g. `s3://<state-bucket>/<confirmed-app-backend-prefix>`; do **not** use bootstrap's `/bootstrap` output as the app URL.
+- **Secret** `PROTOTYPE_CD_AWS_ACCESS_KEY_ID`: dedicated IAM user's access key ID.
+- **Secret** `PROTOTYPE_CD_AWS_SECRET_ACCESS_KEY`: that access key's secret.
+
+The job uses the already-configured `ap-southeast-1` region and stack `prototype`, Node `22.23.2`, pnpm from the root package-manager pin, Pulumi CLI `3.267.0`, frozen dependencies, and a Docker-capable runner. It logs in to the given S3 backend and runs `pulumi up --yes` with `IMAGE_TAG` set to the triggering **commit SHA**. Never remove `IMAGE_TAG` in CD: untagged repository-only mode would propose removal of the Lambda and distribution. Keep the access key out of logs and repository files.
+
+Existing CI still triggers on pushes to `develop`, subject to its existing workflow-level ignores. Deployment additionally waits for the successful `build` job (after lint, type-check, and format) and a changed-files job. The push must change a **non-Markdown** file under `apps/**`, `packages/**`, or `infra/**`, or one of `Dockerfile.lambda`, `.dockerignore`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, `.github/workflows/ci.yml`. Mixed commits with a qualifying file deploy; Markdown-only changes, even under `infra/**`, and unrelated files such as `docker-compose.yaml` or `services/mock-auth/config.yaml` do not. An initial push without a valid previous commit fails closed. Deployments share a concurrency group and do not cancel an update in progress; a queued run checks for newer **app-affecting** changes before applying, so a later docs-only push cannot discard the last app update. Newer pending GitHub runs can replace intermediate pending ones.
+
+**Operator verification:** With the dedicated user, a Docker-capable environment, and the confirmed backend, run `pulumi login '<verified-app-backend-url>'` and `pulumi stack select prototype` from `infra/prototype-serverless`, then `IMAGE_TAG=<new-immutable-tag> pulumi preview` and a controlled `IMAGE_TAG=<same-tag> pulumi up`. Confirm backend S3 reads/writes, KMS state/secrets access, ECR image push, new Lambda version, and movement of `live`; inspect any denied API call before making a narrowly scoped policy revision. Check GitHub runs for qualifying, Markdown-only, unrelated, and mixed pushes and for CI failure/serialized updates. **No live AWS or GitHub deployment is claimed by this documentation.**
+
+**Rollback:** Revert the bad app commit on `develop` and let the resulting **new SHA** rebuild the known-good source and update `live` after CI succeeds. If CI/CD is unavailable, an authorised operator can check out the known-good source and run a tagged preview/update against the existing backend with a **new immutable tag**. Do not reuse an existing ECR tag, run Pulumi without `IMAGE_TAG`, reinitialise state, or broaden the CD policy for emergency infrastructure changes. Revoke/rotate the dedicated access key if compromised.
+
 ### Overcoming Corporate Firewall
 
 Follow these instructions when deploying the image for the first time from a local device behind a corporate firewall.
@@ -92,8 +132,8 @@ const image = new awsx.ecr.Image('prototype-serverless-built-image', {
 ## Validation and known limits
 
 - Build and locally smoke-test the Lambda container: check `/api/v1/health` (requires a reachable database), SPA deep links, built assets, missing assets (must not return HTML as 200), and API error paths. Ensure runtime configuration is available **before NestJS modules load**.
-- Preview both bootstrap and image-backed phases against the intended backend/account/region. This repo does not include an automated deployment or AWS preview environment; an operator must run these checks with authorized credentials and a working Docker build environment for `up`.
+- Preview both bootstrap and image-backed phases against the intended backend/account/region. Automated CD does not provide an AWS preview environment or bootstrap new resources; an operator must run those checks with authorised credentials and a working Docker build environment for `up`.
 - Once the **separate** runtime-secret-loading effort lands, test direct unauthenticated Function URL denial versus CloudFront success, Singapore access versus non-Singapore 403, API POST and cookie sessions, SPA routes, static and missing-asset behavior, cache/error semantics, startup logs, and a second image-tag deployment. An IAM-authenticated direct URL is not intended as a public origin; verify the deployed alias permissions remain distribution-scoped.
-- The Lambda role currently has logging permissions but **no SSM/KMS runtime read grants**: the application retrieval effort must identify exact parameter names and the secrets project's SSM KMS key ARN before least-privilege grants can be added. Existing secrets use `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`, while the backend expects `SES_ACCESS_KEY_ID` / `SES_SECRET_ACCESS_KEY`; resolve that mapping in the separate application work. Infrastructure deployment by itself does not make the app start successfully.
+- The Lambda role has logging, SSM parameter-path read, and secrets-project KMS decrypt grants in `index.ts`; these **runtime** grants are not CD-user permissions. The separate application retrieval effort must still load and validate the required parameters. Existing secrets use `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`, while the backend expects `SES_ACCESS_KEY_ID` / `SES_SECRET_ACCESS_KEY`; resolve that mapping in the separate application work. Infrastructure deployment by itself does not make the app start successfully.
 - Set application domain, OAuth callback URL, passkey RP ID, and passkey origin to match the generated CloudFront hostname before authentication tests. Verify secure session-cookie and mutation behavior behind the HTTPS proxy.
 - The CloudFront `SG` allowlist filters by viewer IP geolocation; it is not proof of a person's location or Singapore-only processing. Lambda suitability (startup, cold starts, DB connections, auth and load behavior) remains unvalidated. Do not treat successful provisioning as production readiness.

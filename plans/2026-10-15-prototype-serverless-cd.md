@@ -37,7 +37,11 @@ The inline-policy template uses repository, unqualified function, `live` alias, 
 
 - [x] Derive and add the smallest viable **placeholder-based** IAM user inline-policy document for updates to existing resources, including ECR authentication/push, Lambda update/version/alias operations, Pulumi provider reads, and S3/KMS backend access; ensure JSON syntax, action/resource support, and excluded write/create permissions are documented.
 - [x] Add a `deploy` job and changed-files detection to `.github/workflows/ci.yml`. Gate deployment on a push to `develop`, successful CI, and an app-affecting non-Markdown change; use GitHub Actions access-key secrets, correct backend/stack selection, immutable SHA tag, and serialized deployment.
-- [ ] **Documentation (last):** update `infra/prototype-serverless/README.md` with the dedicated IAM user/inline-policy setup, required ARN placeholder substitutions and how to find the actual state prefix/state KMS ARN, GitHub Actions variable/secret names, safeguards, trigger boundaries, and operator-run verification/rollback instructions. No IAM user, access key, or policy attachment is created by Pulumi or this workflow; reflect the agreed decisions in this plan.
+- [x] **Documentation (last):** update `infra/prototype-serverless/README.md` with the dedicated IAM user/inline-policy setup, required ARN placeholder substitutions and how to find the actual state prefix/state KMS ARN, GitHub Actions variable/secret names, safeguards, trigger boundaries, and operator-run verification/rollback instructions. No IAM user, access key, or policy attachment is created by Pulumi or this workflow; reflect the agreed decisions in this plan.
+
+## Execution decisions
+
+The workflow uses a pinned `tj-actions/changed-files` revision to compare the push's before/after SHAs, includes deleted app files, and excludes Markdown in allowed paths. An initial push without a valid base fails closed. Deploy is serialized without cancelling running Pulumi updates; a queued run compares intervening commits and skips only if newer app-affecting changes have arrived (docs-only pushes are not allowed to discard an app release). Node is pinned to `22.23.2`, pnpm to the root package manager version, and Pulumi CLI to `3.267.0`. Operator verification of deployed ARNs, real S3 key prefixes and controlled AWS updates remains outstanding; automated checks cannot prove AWS authorization or live deployment.
 
 ## Verification
 
