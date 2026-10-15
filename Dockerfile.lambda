@@ -3,10 +3,10 @@ FROM public.ecr.aws/docker/library/node:22-trixie-slim AS base-builder
 ENV TURBO_TELEMETRY_DISABLED=1
 RUN npm install -g pnpm@12.6.0 turbo @nestjs/cli
 WORKDIR /usr/src/app
-COPY . .
 
 # ---- STAGE 2: PRUNE ----
 FROM base-builder AS pruner
+COPY . .
 RUN turbo prune backend frontend --docker
 
 # ---- STAGE 3: BUILD ----

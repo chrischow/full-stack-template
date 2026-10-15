@@ -80,6 +80,14 @@ Finally, re-generate the Prisma client with `pnpm --filter=@repo/db pnpm db:gene
 ### Seeding the DB
 Amend `packages/db/prisma/seed.ts`, then run `pnpm --filter=@repo/db db:seed:run`.
 
+### Building the Image Locally
+
+Use Podman:
+
+```bash
+podman build . -t <your-tag> --build-arg LOCAL_BUILD=true
+```
+
 ## Development
 Refer to the [Development docs](./docs/index.md).
 
