@@ -53,7 +53,7 @@ pulumi up
 
 #### Overcoming Corporate Firewall
 
-If your local device is behind a corporate firewall, you will need some additional configuration **before** deploying.
+If your local device is behind a corporate firewall, you will need some additional configuration to deploy successfully.
 
 After your first deployment failure, you should see a BuildKit container running in Podman/Docker. Copy your corporate CA certificate into the BuildKit container's certs folder:
 
