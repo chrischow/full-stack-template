@@ -46,7 +46,7 @@ async function main() {
   })
   const imageUri = pulumi.interpolate`${repository.repositoryUrl}@${image.imageDigest}`
 
-  const functionName = `${appName}-prototype-serverless`
+  const functionName = `${appName}-prototype`
   const executionRole = new aws.iam.Role('prototype-serverless-execution-role', {
     assumeRolePolicy: JSON.stringify({
       Version: '2012-10-17',
