@@ -1,5 +1,5 @@
-name: prototype
-description: Project for prototype infra
+name: prototype-serverless
+description: Project for prototype serverless infra
 runtime:
   name: nodejs
   options:

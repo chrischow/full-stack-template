@@ -1,0 +1,7 @@
+config:
+  aws:region: ap-southeast-1
+  prototype-serverless:accountId: "699037282084"
+  prototype-serverless:appName: fst
+  prototype-serverless:lambdaTimeoutSeconds: "180"
+secretsprovider: awskms:///arn:aws:kms:ap-southeast-1:699037282084:key/24d4ca90-0fd7-4bc6-8716-9e48d76dab9f
+encryptedkey: AQICAHjJUNnYYLiG75bE2RX6Mc7AzlS7qH2IZghye1rB5jFyVAFTZZlBC90efLZFR70EU/SHAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM5pKsCr07tvFyQzm0AgEQgDvs5oAeN17Myg8iS9OtKw+Y80OyoPP/5tQjgcy6qOJYWLuomzh09d0XX9CNUl85x2hBFfGNOXQ/POI1Ew==
