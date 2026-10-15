@@ -95,6 +95,20 @@ async function main() {
     ),
   })
 
+  const ssmPolicy = new aws.iam.RolePolicy('prototype-serverless-ssm', {
+    role: executionRole.id,
+    policy: JSON.stringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['ssm:GetParametersByPath'],
+          Resource: `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+        },
+      ],
+    }),
+  })
+
   const lambda = new aws.lambda.Function(
     'prototype-serverless-function',
     {
@@ -113,7 +127,7 @@ async function main() {
         },
       },
     },
-    { dependsOn: [loggingPolicy] },
+    { dependsOn: [loggingPolicy, ssmPolicy] },
   )
 
   const alias = new aws.lambda.Alias('prototype-serverless-live', {
