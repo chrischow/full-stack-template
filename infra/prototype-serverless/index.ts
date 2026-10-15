@@ -7,6 +7,7 @@ async function main() {
   const accountId = config.require('accountId')
   const appName = config.require('appName')
   const expectedRegion = new pulumi.Config('aws').require('region')
+  const lambdaTimeoutSeconds = config.getNumber('lambdaTimeoutSeconds') ?? 60
 
   const [caller, region, partition] = await Promise.all([
     aws.getCallerIdentity({}),
@@ -150,7 +151,7 @@ async function main() {
       imageUri: image.imageUri,
       architectures: ['x86_64'],
       memorySize: 1024,
-      timeout: 30,
+      timeout: lambdaTimeoutSeconds,
       publish: true,
       environment: {
         variables: {
