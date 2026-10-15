@@ -49,17 +49,23 @@ async function main() {
   })
   const ssmKmsKeyArn = secretsStack.requireOutput('ssmKeyArn')
 
-  const image = new awsx.ecr.Image('prototype-serverless-built-image', {
-    repositoryUrl: repository.repositoryUrl,
-    registryId: accountId,
-    imageTag,
-    context: '../..',
-    dockerfile: '../../Dockerfile.lambda',
-    platform: 'linux/amd64',
-    args: {
-      LOCAL_BUILD: 'true',
+  const image = new awsx.ecr.Image(
+    'prototype-serverless-built-image',
+    {
+      repositoryUrl: repository.repositoryUrl,
+      registryId: accountId,
+      imageTag,
+      context: '../..',
+      dockerfile: '../../Dockerfile.lambda',
+      platform: 'linux/amd64',
+      args: {
+        LOCAL_BUILD: 'true',
+      },
     },
-  })
+    {
+      retainOnDelete: true,
+    },
+  )
 
   const functionName = `${appName}-prototype`
   const executionRole = new aws.iam.Role('prototype-serverless-execution-role', {
@@ -104,7 +110,10 @@ async function main() {
         {
           Effect: 'Allow',
           Action: ['ssm:GetParametersByPath'],
-          Resource: `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+          Resource: [
+            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype`,
+            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+          ],
         },
       ],
     }),
