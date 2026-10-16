@@ -7,12 +7,6 @@ export = async () => {
   const accountId = config.require('accountId')
 
   const stackName = pulumi.getStack()
-  const envSlugMap: Record<string, string> = {
-    prototype: 'prototype',
-    staging: 'staging',
-    production: 'prod',
-  }
-  const envSlug = envSlugMap[stackName] ?? stackName
 
   // Account guard: verify the active AWS profile/credentials match the configured accountId
   const caller = await aws.getCallerIdentity({})
@@ -24,11 +18,11 @@ export = async () => {
 
   const tags = {
     Project: appName,
-    Env: envSlug,
+    Env: stackName,
     Purpose: 'pulumi-state',
   }
 
-  const bucketName = `${appName}-pulumi-state-${envSlug}-${accountId}`
+  const bucketName = `${appName}-pulumi-state-${stackName}-${accountId}`
 
   const stateBucket = new aws.s3.Bucket(
     'state',
@@ -180,8 +174,8 @@ export = async () => {
   const stateBackendPolicy = new aws.iam.Policy(
     'state-backend-policy',
     {
-      name: `${appName}-pulumi-state-backend-${envSlug}`,
-      description: `Least-privilege Pulumi state backend access for ${envSlug}`,
+      name: `${appName}-pulumi-state-backend-${stackName}`,
+      description: `Least-privilege Pulumi state backend access for ${stackName}`,
       tags,
       policy: pulumi.all([stateBucket.arn, stateKey.arn]).apply(([bucketArn, keyArn]) =>
         JSON.stringify({
