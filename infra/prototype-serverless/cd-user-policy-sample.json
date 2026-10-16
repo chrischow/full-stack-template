@@ -50,7 +50,10 @@
       "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
       "Effect": "Allow",
       "Action": ["lambda:GetAlias", "lambda:UpdateAlias", "lambda:GetFunctionUrlConfig", "lambda:GetPolicy"],
-      "Resource": "arn:aws:lambda:ap-southeast-1:699037282084:function:fst-prototype:live"
+      "Resource": [
+        "arn:aws:lambda:ap-southeast-1:699037282084:function:fst-prototype",
+        "arn:aws:lambda:ap-southeast-1:699037282084:function:fst-prototype:live"
+      ]
     },
     {
       "Sid": "ReadExistingExecutionRoleAndInlinePolicies",

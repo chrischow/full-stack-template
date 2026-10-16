@@ -47,7 +47,7 @@
       "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
       "Effect": "Allow",
       "Action": ["lambda:GetAlias", "lambda:UpdateAlias", "lambda:GetFunctionUrlConfig", "lambda:GetPolicy"],
-      "Resource": "${lambdaAliasArn}"
+      "Resource": ["${lambdaFunctionArn}", "${lambdaAliasArn}"]
     },
     {
       "Sid": "ReadExistingExecutionRoleAndInlinePolicies",
