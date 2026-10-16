@@ -124,14 +124,14 @@
         "${STATE_BUCKET_ARN}/app/.pulumi/stacks/prototype-serverless/*",
         "${STATE_BUCKET_ARN}/app/.pulumi/history/prototype-serverless/*",
         "${STATE_BUCKET_ARN}/app/.pulumi/backups/prototype-serverless/*",
-        "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+        "${STATE_BUCKET_ARN}/app/.pulumi/locks/organization/prototype-serverless/*"
       ]
     },
     {
       "Sid": "DeletePrototypeServerlessProjectLocks",
       "Effect": "Allow",
       "Action": "s3:DeleteObject",
-      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/locks/organization/prototype-serverless/*"
     },
     {
       "Sid": "ReadReferencedSecretsStackCheckpoint",
@@ -148,7 +148,7 @@
     {
       "Sid": "EncryptAndDecryptPulumiStackSecrets",
       "Effect": "Allow",
-      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey"],
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey", "kms:GenerateDataKey"],
       "Resource": "${PULUMI_SECRETS_PROVIDER_KEY_ARN}"
     },
     {

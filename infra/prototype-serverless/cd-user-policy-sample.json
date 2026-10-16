@@ -124,14 +124,14 @@
         "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/stacks/prototype-serverless/*",
         "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/history/prototype-serverless/*",
         "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/backups/prototype-serverless/*",
-        "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/locks/prototype-serverless/*"
+        "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/locks/organization/prototype-serverless/*"
       ]
     },
     {
       "Sid": "DeletePrototypeServerlessProjectLocks",
       "Effect": "Allow",
       "Action": "s3:DeleteObject",
-      "Resource": "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/locks/prototype-serverless/*"
+      "Resource": "arn:aws:s3:::fst-pulumi-state-prototype-699037282084/app/.pulumi/locks/organization/prototype-serverless/*"
     },
     {
       "Sid": "ReadReferencedSecretsStackCheckpoint",
@@ -148,7 +148,7 @@
     {
       "Sid": "EncryptAndDecryptPulumiStackSecrets",
       "Effect": "Allow",
-      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey"],
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey", "kms:GenerateDataKey"],
       "Resource": "arn:aws:kms:ap-southeast-1:699037282084:key/24d4ca90-0fd7-4bc6-8716-9e48d76dab9f"
     },
     {
