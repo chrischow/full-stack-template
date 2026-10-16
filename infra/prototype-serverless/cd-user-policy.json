@@ -35,7 +35,7 @@
         "lambda:UpdateFunctionCode",
         "lambda:PublishVersion"
       ],
-      "Resource": "${lambdaFunctionArn}"
+      "Resource": ["${lambdaFunctionArn}", "${lambdaFunctionArn}:*"]
     },
     {
       "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
