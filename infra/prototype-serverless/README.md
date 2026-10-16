@@ -1,12 +1,12 @@
-# Prototype serverless deployment
+# Prototype Serverless Infra
 
-This Pulumi project provisions an ECR repository, then builds and pushes a Lambda image with `awsx.ecr.Image` and provisions Lambda and CloudFront. It is a **prototype**, not a validated production platform.
+This Pulumi project provisions an ECR repository, then builds and pushes a Lambda image with `awsx.ecr.Image` and provisions Lambda and CloudFront. It is for **prototype** infra only.
 
 ## Prerequisites
 
 - The `bootstrap` prototype stack must be initialised
-- The `secrets` prototyep stack must be initialised with the required secrets
-- AWS credentials to manage ECR, Lambda, and Cloudfront
+- The `secrets` prototype stack must be initialised with the required secrets
+- AWS credentials to manage ECR, Lambda, and CloudFront
 
 ## Initialisation
 
@@ -14,7 +14,7 @@ Login to the remote backend:
 
 ```bash
 export AWS_PROFILE='<authorized-prototype-profile>'
-pulumi login 's3://fst-pulumi-state-prototype-<account-id>/app'
+pulumi login 's3://<verified-state-bucket>/app'
 ```
 
 Initialise the `prototype` stack:
@@ -35,14 +35,13 @@ Bootstrap the image repository by deploying **without an image tag**. This will 
 ```bash
 pulumi preview
 pulumi up
-pulumi stack output repositoryUrl
 ```
 
-## Deploy New Image
+### Deploy New Image
 
-> **Note:** After running this for the first time, DO NOT run `pulumi up` without an image tag because this will remove the Lambda and distribution.
+> **Note:** After running this successfully the first time, DO NOT run `pulumi up` without an image tag because this will remove the Lambda and CloudFront distribution.
 
-Choose an immutable tag (e.g. commit SHA) for each image release and export it as `IMAGE_TAG` for both preview and update. Pulumi will build the image and push it to ECR. Keep `IMAGE_TAG` set for subsequent previews and updates; without it the program runs in repository-only mode and would remove the Lambda and distribution.
+Choose an immutable tag (e.g. commit SHA) for each image release and export it as `IMAGE_TAG` for both preview and update. Pulumi will build the image and push it to ECR.
 
 For the first run, this will create a Cloudfront distribution, log group, IAM role, and a Lambda function that is pointed at the newly-created image. For subsequent runs, deployments will build the image, point the Lambda function at the new image, and update the `live` alias.
 
@@ -50,15 +49,13 @@ For the first run, this will create a Cloudfront distribution, log group, IAM ro
 export IMAGE_TAG=<new-immutable-tag>
 pulumi preview
 pulumi up
-pulumi stack output imageUri
-pulumi stack output distributionDomain
 ```
 
-### Overcoming Corporate Firewall
+#### Overcoming Corporate Firewall
 
-Follow these instructions when deploying the image for the first time from a local device behind a corporate firewall.
+If your local device is behind a corporate firewall, you will need some additional configuration to deploy successfully.
 
-Copy your corporate CA certificate into the Docker BuildKit container's certs folder:
+After your first deployment failure, you should see a BuildKit container running in Podman/Docker. Copy your corporate CA certificate into the BuildKit container's certs folder:
 
 ```bash
 podman cp <path-to-ca-cert> <name-of-buildkit-container>:/etc/ssl/certs/
@@ -70,30 +67,66 @@ Reload the BuildKit daemon **INSIDE the container**:
 pkill -HUP buildkitd
 ```
 
-The above instructions will enable the BuildKit container to trust the self-signed certificate on the firewall.
+The above instructions will enable the BuildKit container to trust the self-signed certificate on the firewall. The deployment should succeed now.
 
-However, as part of the build, the BuildKit container will fail to install the Prisma binaries in the step `turbo build --filter=backend --filter=frontend`. To resolve this, in `Dockerfile.lambda`, temporarily set the `LOCAL_BUILD` argument on the `awsx.ecr.Image` resource in `infra/prototype-serverless/index.ts`:
+## Continuous Deployment on `develop`
 
-```ts
-const image = new awsx.ecr.Image('prototype-serverless-built-image', {
-    repositoryUrl: repository.repositoryUrl,
-    registryId: accountId,
-    imageTag,
-    context: '../..',
-    dockerfile: '../../Dockerfile.lambda',
-    platform: 'linux/amd64',
-    // ADD BLOCK BELOW TEMPORARILY
-    args: {
-      LOCAL_BUILD: 'true'
-    }
-  })
+The `deploy` job in `.github/workflows/ci.yml` is for **updates to an already-initialised `prototype` stack**. The trigger conditions are:
+
+- Merge to `develop`; AND
+- App-related or infra-related code/artifact changes
+
+### Setup: GitHub Variables and Secrets
+
+Set up the following variables/secrets on GitHub:
+
+| Type | Name | Purpose |
+| :- | :- | :- |
+| Variable | `PROTOTYPE_PULUMI_BACKEND_URL` | S3 backend URL: `s3://<bucket-name>/app` |
+| Secret | `PROTOTYPE_CD_AWS_ACCESS_KEY_ID` | Access key ID for CD IAM user |
+| Secret | `PROTOTYPE_CD_AWS_SECRET_ACCESS_KEY` | Secret access key for CD IAM user |
+
+### Setup: CD IAM User
+
+After initialisation of the stack, run the following to get the outputs:
+
+```bash
+pulumi stack output
 ```
 
-## Validation and known limits
+Use the following outputs to replace the placeholders in `cd-user-policy.json`:
 
-- Build and locally smoke-test the Lambda container: check `/api/v1/health` (requires a reachable database), SPA deep links, built assets, missing assets (must not return HTML as 200), and API error paths. Ensure runtime configuration is available **before NestJS modules load**.
-- Preview both bootstrap and image-backed phases against the intended backend/account/region. This repo does not include an automated deployment or AWS preview environment; an operator must run these checks with authorized credentials and a working Docker build environment for `up`.
-- Once the **separate** runtime-secret-loading effort lands, test direct unauthenticated Function URL denial versus CloudFront success, Singapore access versus non-Singapore 403, API POST and cookie sessions, SPA routes, static and missing-asset behavior, cache/error semantics, startup logs, and a second image-tag deployment. An IAM-authenticated direct URL is not intended as a public origin; verify the deployed alias permissions remain distribution-scoped.
-- The Lambda role currently has logging permissions but **no SSM/KMS runtime read grants**: the application retrieval effort must identify exact parameter names and the secrets project's SSM KMS key ARN before least-privilege grants can be added. Existing secrets use `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`, while the backend expects `SES_ACCESS_KEY_ID` / `SES_SECRET_ACCESS_KEY`; resolve that mapping in the separate application work. Infrastructure deployment by itself does not make the app start successfully.
-- Set application domain, OAuth callback URL, passkey RP ID, and passkey origin to match the generated CloudFront hostname before authentication tests. Verify secure session-cookie and mutation behavior behind the HTTPS proxy.
-- The CloudFront `SG` allowlist filters by viewer IP geolocation; it is not proof of a person's location or Singapore-only processing. Lambda suitability (startup, cold starts, DB connections, auth and load behavior) remains unvalidated. Do not treat successful provisioning as production readiness.
+| Name | Purpose |
+| :- | :- |
+| `repositoryArn` | For permissions to read and push to existing ECR repo. |
+| `lambdaFunctionArn` | For permissions to read and update the Lambda function. |
+| `lambdaAliasArn` | For permissions to get and update the Lambda alias, `live`. |
+| `lambdaExecutionRoleArn` | For permissions to read the role for comparing state. No updates allowed. |
+| `lambdaLogGroupArn` | For permissions to read tags on the log group for comparing state. No updates allowed. |
+| `cloudfrontDistributionArn` | For permissions to read the CloudFront distribution for comparing state. No updates allowed. |
+| `cloudfrontOacArn` | For permissions to read the CloudFront Origin Access Control for comparing state. No updates allowed. |
+| `cloudfrontOriginRequestPolicyArn` | For permissions to read the CloudFront Origin Request Policy for comparing state. No updates allowed. |
+
+Also use the following variables from the other Pulumi projects to replace the remaining placeholders:
+
+| Name | Purpose |
+| :- | :- |
+| `STATE_BUCKET_ARN` | For amending state for this stack, and reading state from the secrets project. No update to the secrets project state are allowed. |
+| `STATE_KMS_KEY_ARN` | For encrypting and decrypyting state. |
+| `PULUMI_SECRETS_PROVIDER_KEY_ARN` | For encrypting and decrypting Pulumi secrets. |
+
+Commit the changes.
+
+On the AWS Console:
+
+1. Create an IAM policy (e.g. `prototype-cd-policy`) defined in the updated `cd-user-policy.json`.
+2. Create an IAM user e.g. `prototype-cd-user`
+3. Attach the policy to the user
+
+## Rollback
+Revert the bad app commit on `develop` to create a **new SHA**. Either:
+
+- Re-run the deployment locally with the new SHA; or
+- Commit it to `develop`
+
+Do not use an existing image tag or an empty image tag.

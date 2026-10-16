@@ -1,0 +1,161 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AuthenticateToEcr",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadAndPushExistingImageRepository",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages",
+        "ecr:ListTagsForResource",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
+      ],
+      "Resource": "${repositoryArn}"
+    },
+    {
+      "Sid": "UpdateExistingFunctionImageAndPublishVersion",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:ListVersionsByFunction",
+        "lambda:ListTags",
+        "lambda:UpdateFunctionCode",
+        "lambda:PublishVersion"
+      ],
+      "Resource": "${lambdaFunctionArn}"
+    },
+    {
+      "Sid": "MoveExistingLiveAliasAndReadUrlPermissions",
+      "Effect": "Allow",
+      "Action": ["lambda:GetAlias", "lambda:UpdateAlias", "lambda:GetFunctionUrlConfig", "lambda:GetPolicy"],
+      "Resource": "${lambdaAliasArn}"
+    },
+    {
+      "Sid": "ReadExistingExecutionRoleAndInlinePolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRoleTags"
+      ],
+      "Resource": "${lambdaExecutionRoleArn}"
+    },
+    {
+      "Sid": "ReadExistingLogGroupTags",
+      "Effect": "Allow",
+      "Action": "logs:ListTagsForResource",
+      "Resource": "${lambdaLogGroupArn}"
+    },
+    {
+      "Sid": "DescribeLogGroups",
+      "Effect": "Allow",
+      "Action": "logs:DescribeLogGroups",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontDistribution",
+      "Effect": "Allow",
+      "Action": ["cloudfront:GetDistribution", "cloudfront:GetDistributionConfig", "cloudfront:ListTagsForResource"],
+      "Resource": "${cloudfrontDistributionArn}"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontOriginAccessControl",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginAccessControl",
+        "cloudfront:GetOriginAccessControlConfig",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "${cloudfrontOacArn}"
+    },
+    {
+      "Sid": "ReadExistingCloudFrontOriginRequestPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginRequestPolicy",
+        "cloudfront:GetOriginRequestPolicyConfig",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "${cloudfrontOriginRequestPolicyArn}"
+    },
+    {
+      "Sid": "ReadStateBucket",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "${STATE_BUCKET_ARN}"
+    },
+    {
+      "Sid": "ListAppBackendState",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:ListBucketVersions"],
+      "Resource": "${STATE_BUCKET_ARN}",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": ["app", "app/*"]
+        }
+      }
+    },
+    {
+      "Sid": "ReadAppBackendMetadata",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/meta.yaml"
+    },
+    {
+      "Sid": "ReadAndWritePrototypeServerlessProjectState",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject"],
+      "Resource": [
+        "${STATE_BUCKET_ARN}/app/.pulumi/stacks/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/history/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/backups/prototype-serverless/*",
+        "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+      ]
+    },
+    {
+      "Sid": "DeletePrototypeServerlessProjectLocks",
+      "Effect": "Allow",
+      "Action": "s3:DeleteObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/locks/prototype-serverless/*"
+    },
+    {
+      "Sid": "ReadReferencedSecretsStackCheckpoint",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "${STATE_BUCKET_ARN}/app/.pulumi/stacks/secrets/prototype.json"
+    },
+    {
+      "Sid": "EncryptAndDecryptS3State",
+      "Effect": "Allow",
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"],
+      "Resource": "${STATE_KMS_KEY_ARN}"
+    },
+    {
+      "Sid": "EncryptAndDecryptPulumiStackSecrets",
+      "Effect": "Allow",
+      "Action": ["kms:Encrypt", "kms:Decrypt", "kms:DescribeKey"],
+      "Resource": "${PULUMI_SECRETS_PROVIDER_KEY_ARN}"
+    },
+    {
+      "Sid": "CheckTargetAwsAccount",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    }
+  ]
+}

@@ -82,3 +82,74 @@ jobs:
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.job }}
+  should-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      deploy: ${{ steps.app-changes.outputs.any_modified }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # Fail closed on an initial branch push with no valid before SHA.
+      - name: Detect app-affecting changes in this push
+        if: github.event.before != '0000000000000000000000000000000000000000'
+        id: app-changes
+        uses: tj-actions/changed-files@v47
+        with:
+          base_sha: ${{ github.event.before }}
+          sha: ${{ github.sha }}
+          files: |
+            apps/**
+            packages/**
+            infra/**
+            Dockerfile.lambda
+            .dockerignore
+            package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+            turbo.json
+            .github/workflows/ci.yml
+          files_ignore: |
+            **/*.[mM][dD]
+            **/*.[mM][dD][xX]
+  deploy:
+    needs: [build, should-deploy]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && needs.should-deploy.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: prototype-serverless-deploy
+      cancel-in-progress: false
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      PULUMI_BACKEND_URL: ${{ vars.PROTOTYPE_PULUMI_BACKEND_URL }}
+      AWS_REGION: ap-southeast-1
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.23.2
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: pulumi/setup-pulumi@v2
+        with:
+          pulumi-version: 3.267.0
+      - name: Configure dedicated deployer credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.PROTOTYPE_CD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PROTOTYPE_CD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Update the existing prototype stack
+        working-directory: infra/prototype-serverless
+        run: |
+          test -n "$IMAGE_TAG" && test -n "$PULUMI_BACKEND_URL"
+          pulumi login "$PULUMI_BACKEND_URL"
+          pulumi stack select prototype
+          pulumi up --yes
