@@ -117,7 +117,11 @@ Also use the following variables from the other Pulumi projects to replace the r
 
 Commit the changes.
 
-On the AWS Console, created an IAM user with an inline policy defined in the updated `cd-user-policy.json`
+On the AWS Console:
+
+1. Create an IAM policy (e.g. `prototype-cd-policy`) defined in the updated `cd-user-policy.json`.
+2. Create an IAM user e.g. `prototype-cd-user`
+3. Attach the policy to the user
 
 ## Rollback
 Revert the bad app commit on `develop` to create a **new SHA**. Either:
