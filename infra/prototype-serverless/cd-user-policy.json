@@ -8,6 +8,12 @@
       "Resource": "*"
     },
     {
+      "Sid": "AllowPublicECRAuthentication",
+      "Effect": "Allow",
+      "Action": ["ecr-public:GetAuthorizationToken", "sts:GetServiceBearerToken"],
+      "Resource": "*"
+    },
+    {
       "Sid": "ReadAndPushExistingImageRepository",
       "Effect": "Allow",
       "Action": [
