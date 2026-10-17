@@ -9,11 +9,7 @@ export = async () => {
   const expectedRegion = new pulumi.Config('aws').require('region')
   const lambdaTimeoutSeconds = config.getNumber('lambdaTimeoutSeconds') ?? 60
 
-  const [caller, region, partition] = await Promise.all([
-    aws.getCallerIdentity({}),
-    aws.getRegion({}),
-    aws.getPartition({}),
-  ])
+  const [caller, region] = await Promise.all([aws.getCallerIdentity({}), aws.getRegion({})])
 
   if (caller.accountId !== accountId) {
     throw new Error(
@@ -132,10 +128,10 @@ export = async () => {
           Resource: ssmKmsKeyArn,
           Condition: {
             StringEquals: {
-              'kms:ViaService': `ssm.${expectedRegion}.${partition.dnsSuffix}`,
+              'kms:ViaService': `ssm.${expectedRegion}.amazonaws.com`,
             },
             StringLike: {
-              'kms:EncryptionContext:PARAMETER_ARN': `arn:${partition.partition}:ssm:${expectedRegion}:${accountId}:parameter/${appName}/*`,
+              'kms:EncryptionContext:PARAMETER_ARN': `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/${appName}/*`,
             },
           },
         },

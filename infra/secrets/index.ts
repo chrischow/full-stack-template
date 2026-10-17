@@ -49,11 +49,7 @@ export = async () => {
   const expectedRegion = new pulumi.Config('aws').require('region')
   const appName = config.require('appName')
 
-  const [caller, region, partition] = await Promise.all([
-    aws.getCallerIdentity({}),
-    aws.getRegion({}),
-    aws.getPartition({}),
-  ])
+  const [caller, region] = await Promise.all([aws.getCallerIdentity({}), aws.getRegion({})])
   if (caller.accountId !== expectedAccountId) {
     throw new Error(
       `Configured accountId "${expectedAccountId}" does not match AWS caller identity accountId "${caller.accountId}".`,
@@ -63,15 +59,15 @@ export = async () => {
     throw new Error(`AWS provider region does not match configured aws:region "${expectedRegion}".`)
   }
 
-  const parameterArnPattern = `arn:${partition.partition}:ssm:${region.region}:${expectedAccountId}:parameter/${appName}/*`
-  const ssmEndpoint = `ssm.${region.region}.${partition.dnsSuffix}`
+  const parameterArnPattern = `arn:aws:ssm:${region.region}:${expectedAccountId}:parameter/${appName}/*`
+  const ssmEndpoint = `ssm.${region.region}.amazonaws.com`
   const keyPolicy = JSON.stringify({
     Version: '2012-10-17',
     Statement: [
       {
         Sid: 'EnableAccountKeyAdministrationAndIamDelegation',
         Effect: 'Allow',
-        Principal: { AWS: `arn:${partition.partition}:iam::${expectedAccountId}:root` },
+        Principal: { AWS: `arn:aws:iam::${expectedAccountId}:root` },
         Action: 'kms:*',
         Resource: '*',
       },
