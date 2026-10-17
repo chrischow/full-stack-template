@@ -44,9 +44,10 @@ const secureParameterNames = new Set<ParameterName>([
 
 export = async () => {
   const stack = pulumi.getStack()
-  const config = new pulumi.Config('secrets')
+  const config = new pulumi.Config()
   const expectedAccountId = config.require('accountId')
   const expectedRegion = new pulumi.Config('aws').require('region')
+  const appName = config.require('appName')
 
   const [caller, region, partition] = await Promise.all([
     aws.getCallerIdentity({}),
@@ -62,7 +63,7 @@ export = async () => {
     throw new Error(`AWS provider region does not match configured aws:region "${expectedRegion}".`)
   }
 
-  const parameterArnPattern = `arn:${partition.partition}:ssm:${region.region}:${expectedAccountId}:parameter/${stack}/*`
+  const parameterArnPattern = `arn:${partition.partition}:ssm:${region.region}:${expectedAccountId}:parameter/${appName}/*`
   const ssmEndpoint = `ssm.${region.region}.${partition.dnsSuffix}`
   const keyPolicy = JSON.stringify({
     Version: '2012-10-17',
@@ -101,7 +102,7 @@ export = async () => {
   const ssmKey = new aws.kms.Key(
     'ssm-key',
     {
-      description: `SSM SecureString encryption for ${stack}`,
+      description: `SSM SecureString encryption for ${appName}-${stack}`,
       customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
       enableKeyRotation: true,
       deletionWindowInDays: 30,
@@ -114,7 +115,7 @@ export = async () => {
   for (const name of parameterNames) {
     const secure = secureParameterNames.has(name)
     new aws.ssm.Parameter(`ssm-${name}`, {
-      name: `/${stack}/${name}`,
+      name: `/${appName}/${name}`,
       type: secure ? aws.ssm.ParameterType.SecureString : aws.ssm.ParameterType.String,
       value: config.requireSecret(name),
       ...(secure ? { keyId: ssmKey.arn } : {}),

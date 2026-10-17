@@ -3,7 +3,7 @@ import * as awsx from '@pulumi/awsx'
 import * as pulumi from '@pulumi/pulumi'
 
 export = async () => {
-  const config = new pulumi.Config('prototype-serverless')
+  const config = new pulumi.Config()
   const accountId = config.require('accountId')
   const appName = config.require('appName')
   const expectedRegion = new pulumi.Config('aws').require('region')
@@ -113,8 +113,8 @@ export = async () => {
           Effect: 'Allow',
           Action: ['ssm:GetParametersByPath'],
           Resource: [
-            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype`,
-            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/${appName}`,
+            `arn:aws:ssm:${expectedRegion}:${accountId}:parameter/${appName}/*`,
           ],
         },
       ],
@@ -135,7 +135,7 @@ export = async () => {
               'kms:ViaService': `ssm.${expectedRegion}.${partition.dnsSuffix}`,
             },
             StringLike: {
-              'kms:EncryptionContext:PARAMETER_ARN': `arn:${partition.partition}:ssm:${expectedRegion}:${accountId}:parameter/prototype/*`,
+              'kms:EncryptionContext:PARAMETER_ARN': `arn:${partition.partition}:ssm:${expectedRegion}:${accountId}:parameter/${appName}/*`,
             },
           },
         },
@@ -159,7 +159,7 @@ export = async () => {
           APP_PORT: '8080',
           AWS_LWA_PORT: '8080',
           CONFIG_SOURCE: 'ssm',
-          SSM_PARAMETER_PREFIX: '/prototype',
+          SSM_PARAMETER_PREFIX: '/${appName}',
           NODE_ENV: 'production',
         },
       },
