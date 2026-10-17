@@ -86,7 +86,7 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.job }}
   should-deploy:
     runs-on: ubuntu-latest
-    if: is_prototype_infra_initialised == 'true'
+    if: env.is_prototype_infra_initialised == 'true'
     permissions:
       contents: read
     outputs:
