@@ -6,8 +6,6 @@ on:
       - '.pi/**'
       - 'docs/**'
       - '**/*.md'
-env:
-  is_prototype_infra_initialised: false
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -86,7 +84,7 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.job }}
   should-deploy:
     runs-on: ubuntu-latest
-    if: env.is_prototype_infra_initialised == 'true'
+    if: vars.IS_PROTOTYPE_INFRA_INITIALISED == 'true'
     permissions:
       contents: read
     outputs:
